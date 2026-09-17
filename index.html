@@ -1624,7 +1624,7 @@
             <span class="badge-no-thiti" id="header-thiti-badge">✂️ ตัด Thiti ออกแล้ว</span>
           </h1>
           <p>
-            <span id="header-date-badge">📅 ข้อมูลเวลาปี 2022 - 2026</span>
+            <span id="header-date-badge">📅 ข้อมูลเวลาทุกปี</span>
             <span>•</span>
             <span id="header-emp-count-badge">👥 พนักงาน 5 คน</span>
             <span>•</span>
@@ -1747,7 +1747,7 @@
         <div class="filter-group">
           <label for="filter-year">📅 เลือกปี</label>
           <select id="filter-year" class="form-control">
-            <option value="ALL">📆 ทุกปี (2022 - 2026)</option>
+            <option value="ALL">📆 ทุกปี (ทุกช่วงเวลา)</option>
             <!-- Generated dynamically by JS -->
           </select>
         </div>
@@ -3189,56 +3189,74 @@
 
         // Days of month
         for (let day = 1; day <= daysInMonth; day++) {
-          const rec = monthRecordsMap[day];
+          let rec = monthRecordsMap[day];
+          if (!rec) {
+            const isoDate = `${targetYear}-${String(targetMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dateObj = new Date(targetYear, targetMonth - 1, day);
+            const jsDay = dateObj.getDay();
+            const dayOfWeek = (jsDay + 6) % 7;
+            rec = {
+              empId: targetEmp,
+              empName: currentEmpObj?.name || '',
+              date: `${String(day).padStart(2, '0')}/${String(targetMonth).padStart(2, '0')}/${targetYear}`,
+              isoDate: isoDate,
+              year: targetYear,
+              month: targetMonth,
+              day: day,
+              dayOfWeek: dayOfWeek,
+              count: 0,
+              punches: [],
+              checkIn: '',
+              checkOut: '',
+              workHours: 0,
+              workHoursFormatted: '-'
+            };
+          }
+
           const cell = document.createElement('div');
           cell.className = 'calendar-day-cell';
 
-          if (rec) {
-            const evalRes = evaluateRecordStatus(rec);
+          const evalRes = evaluateRecordStatus(rec);
 
-            let statusClass = 'is-leave';
-            if (evalRes.status === 'normal') statusClass = 'is-normal';
-            else if (evalRes.status === 'single_punch') statusClass = 'is-single';
-            else if (evalRes.status === 'holiday') statusClass = 'is-holiday';
-            else if (evalRes.status === 'leave') {
-              if (evalRes.leaveType === 'sick') statusClass = 'is-leave is-sick';
-              else if (evalRes.leaveType === 'vacation') statusClass = 'is-leave is-vacation';
-              else if (evalRes.leaveType === 'business') statusClass = 'is-leave is-business';
-              else statusClass = 'is-leave';
-            }
-
-            cell.classList.add(...statusClass.split(' '));
-
-            let badgeLabel = 'หยุด';
-            if (evalRes.status === 'normal') badgeLabel = 'มาปกติ';
-            else if (evalRes.status === 'single_punch') badgeLabel = 'ลืมสแกน';
-            else if (evalRes.status === 'holiday') badgeLabel = 'หยุด';
-            else if (evalRes.status === 'leave') {
-              if (evalRes.leaveType === 'sick') badgeLabel = '🩺 ลาป่วย';
-              else if (evalRes.leaveType === 'vacation') badgeLabel = '🏖️ พักร้อน';
-              else if (evalRes.leaveType === 'business') badgeLabel = '📋 ลากิจ';
-              else if (evalRes.leaveType === 'maternity') badgeLabel = '👶 ลาคลอด';
-              else if (evalRes.leaveType === 'other') badgeLabel = '📝 อื่นๆ';
-              else badgeLabel = '🔴 ลา';
-            }
-
-            cell.innerHTML = `
-              <div class="cell-top">
-                <span class="cell-date-num">${day}</span>
-                <span class="cell-badge ${evalRes.badgeClass}">${badgeLabel}</span>
-              </div>
-              <div class="cell-body">
-                ${rec.checkIn ? `<div class="cell-time-line"><span>เข้า:</span> <strong>${rec.checkIn}</strong></div>` : ''}
-                ${rec.checkOut ? `<div class="cell-time-line"><span>ออก:</span> <strong>${rec.checkOut}</strong></div>` : ''}
-                ${!rec.checkIn && !rec.checkOut ? `<div style="color:var(--text-light); font-size:0.7rem; line-height:1.2;">${evalRes.label || evalRes.holidayName || 'ไม่มีการสแกน'}</div>` : ''}
-              </div>
-            `;
-
-            cell.addEventListener('click', () => openDayDetailModal(rec, evalRes));
-          } else {
-            cell.innerHTML = `<div class="cell-top"><span class="cell-date-num">${day}</span></div>`;
+          let statusClass = 'is-leave';
+          if (evalRes.status === 'normal') statusClass = 'is-normal';
+          else if (evalRes.status === 'single_punch') statusClass = 'is-single';
+          else if (evalRes.status === 'holiday') statusClass = 'is-holiday';
+          else if (evalRes.status === 'leave') {
+            if (evalRes.leaveType === 'sick') statusClass = 'is-leave is-sick';
+            else if (evalRes.leaveType === 'vacation') statusClass = 'is-leave is-vacation';
+            else if (evalRes.leaveType === 'business') statusClass = 'is-leave is-business';
+            else statusClass = 'is-leave';
           }
 
+          cell.classList.add(...statusClass.split(' '));
+
+          let badgeLabel = 'หยุด';
+          if (evalRes.status === 'normal') badgeLabel = 'มาปกติ';
+          else if (evalRes.status === 'single_punch') badgeLabel = 'ลืมสแกน';
+          else if (evalRes.status === 'holiday') badgeLabel = 'หยุด';
+          else if (evalRes.status === 'leave') {
+            if (evalRes.leaveType === 'sick') badgeLabel = '🩺 ลาป่วย';
+            else if (evalRes.leaveType === 'vacation') badgeLabel = '🏖️ พักร้อน';
+            else if (evalRes.leaveType === 'business') badgeLabel = '📋 ลากิจ';
+            else if (evalRes.leaveType === 'maternity') badgeLabel = '👶 ลาคลอด';
+            else if (evalRes.leaveType === 'other') badgeLabel = '📝 อื่นๆ';
+            else badgeLabel = '🔴 ลา';
+          }
+
+          cell.innerHTML = `
+            <div class="cell-top">
+              <span class="cell-date-num">${day}</span>
+              <span class="cell-badge ${evalRes.badgeClass}">${badgeLabel}</span>
+            </div>
+            <div class="cell-body">
+              ${rec.checkIn ? `<div class="cell-time-line"><span>เข้า:</span> <strong>${rec.checkIn}</strong></div>` : ''}
+              ${rec.checkOut ? `<div class="cell-time-line"><span>ออก:</span> <strong>${rec.checkOut}</strong></div>` : ''}
+              ${!rec.checkIn && !rec.checkOut ? `<div style="color:var(--text-light); font-size:0.7rem; line-height:1.2;">${evalRes.label || evalRes.holidayName || 'ไม่มีการสแกน'}</div>` : ''}
+            </div>
+          `;
+
+          cell.addEventListener('click', () => openDayDetailModal(rec, evalRes));
           dom.calendarGrid.appendChild(cell);
         }
       }
@@ -3459,10 +3477,25 @@
       // Filter Handlers
       function updateYearDropdown() {
         if (!dom.filterYear) return;
-        const years = new Set(state.records.map(r => r.year));
-        const sortedYears = Array.from(years).sort((a, b) => b - a);
 
-        dom.filterYear.innerHTML = '<option value="ALL">📆 ทุกปี (2022 - 2026)</option>';
+        // Build a comprehensive set of years (data years + standard range 2018-2035 + current selected year)
+        const yearsSet = new Set();
+        state.records.forEach(r => { if (r.year) yearsSet.add(r.year); });
+
+        // Add broad standard range from 2018 through 2035 so user has plenty of past and future years
+        for (let y = 2018; y <= 2035; y++) {
+          yearsSet.add(y);
+        }
+
+        // If user has selected a custom year (e.g. 2036 or 2015), keep it in the list
+        if (state.filterYear !== 'ALL') {
+          const parsed = parseInt(state.filterYear, 10);
+          if (!isNaN(parsed)) yearsSet.add(parsed);
+        }
+
+        const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
+
+        dom.filterYear.innerHTML = '<option value="ALL">📆 ทุกปี (ทุกช่วงเวลา)</option>';
         sortedYears.forEach(y => {
           const opt = document.createElement('option');
           opt.value = y.toString();
@@ -3471,16 +3504,42 @@
           dom.filterYear.appendChild(opt);
         });
 
-        if (state.filterYear !== 'ALL' && !years.has(parseInt(state.filterYear, 10))) {
-          state.filterYear = sortedYears[0]?.toString() || 'ALL';
-        }
+        // Add Custom Year Option
+        const customOpt = document.createElement('option');
+        customOpt.value = 'CUSTOM_YEAR';
+        customOpt.textContent = '➕ ระบุปีอื่นๆ (พิมพ์ระบุปีเอง)...';
+        dom.filterYear.appendChild(customOpt);
+
         dom.filterYear.value = state.filterYear;
 
         // Update header date badge dynamically
         if (dom.headerDateBadge) {
           dom.headerDateBadge.textContent = state.filterYear === 'ALL'
-            ? '📅 ข้อมูลเวลาปี 2022 - 2026 (ทุกปี)'
+            ? '📅 ข้อมูลเวลาทุกปี'
             : `📅 ข้อมูลเวลาปี ${state.filterYear}`;
+        }
+      }
+
+      // Prompt user to enter any custom year
+      function promptForCustomYear() {
+        const currentY = new Date().getFullYear();
+        const inputYear = prompt('ระบุปี ค.ศ. ที่ต้องการเลือก (เช่น 2027, 2030, 2035):', state.filterYear !== 'ALL' ? state.filterYear : currentY.toString());
+        if (!inputYear) {
+          dom.filterYear.value = state.filterYear;
+          return;
+        }
+        const yNum = parseInt(inputYear.trim(), 10);
+        if (!isNaN(yNum) && yNum >= 1970 && yNum <= 2100) {
+          state.filterYear = yNum.toString();
+          saveFilterState();
+          updateYearDropdown();
+          renderYearPills();
+          state.currentPage = 1;
+          renderAll();
+          showToast(`📆 เลือกแสดงข้อมูลปี ${yNum} เรียบร้อยแล้ว`, 'success');
+        } else {
+          alert('กรุณาระบุปีเป็นตัวเลข ค.ศ. ที่ถูกต้อง (ระหว่าง 1970 - 2100)');
+          dom.filterYear.value = state.filterYear;
         }
       }
 
@@ -3488,16 +3547,28 @@
       function renderYearPills() {
         if (!dom.yearPillsBar) return;
         dom.yearPillsBar.innerHTML = '';
-        const years = new Set(state.records.map(r => r.year));
-        const sortedYears = Array.from(years).sort((a, b) => b - a);
 
+        // All years button
         const allBtn = document.createElement('button');
         allBtn.className = 'pill-btn ' + (state.filterYear === 'ALL' ? 'active' : '');
         allBtn.dataset.year = 'ALL';
-        allBtn.textContent = '📆 ทุกปี (2022 - 2026)';
+        allBtn.textContent = '📆 ทุกปี';
         dom.yearPillsBar.appendChild(allBtn);
 
-        sortedYears.forEach(y => {
+        // Core years to show as pills: all data years + future years 2027, 2028, 2029, 2030
+        const pillYearsSet = new Set();
+        state.records.forEach(r => { if (r.year) pillYearsSet.add(r.year); });
+        [2027, 2028, 2029, 2030].forEach(y => pillYearsSet.add(y));
+
+        // If state.filterYear is a specific year not in the set, add it
+        if (state.filterYear !== 'ALL') {
+          const parsed = parseInt(state.filterYear, 10);
+          if (!isNaN(parsed)) pillYearsSet.add(parsed);
+        }
+
+        const sortedPills = Array.from(pillYearsSet).sort((a, b) => b - a);
+
+        sortedPills.forEach(y => {
           const btn = document.createElement('button');
           btn.className = 'pill-btn ' + (state.filterYear === y.toString() ? 'active' : '');
           btn.dataset.year = y.toString();
@@ -3505,7 +3576,21 @@
           dom.yearPillsBar.appendChild(btn);
         });
 
-        dom.yearPillsBar.querySelectorAll('.pill-btn').forEach(btn => {
+        // "+ ระบุปี" button
+        const customBtn = document.createElement('button');
+        customBtn.className = 'pill-btn';
+        customBtn.id = 'btn-pill-custom-year';
+        customBtn.style.border = '1px dashed var(--primary)';
+        customBtn.style.color = 'var(--primary)';
+        customBtn.textContent = '➕ ระบุปี';
+        customBtn.title = 'คลิกเพื่อพิมพ์ระบุปี ค.ศ. ใดๆ';
+        dom.yearPillsBar.appendChild(customBtn);
+
+        customBtn.addEventListener('click', () => {
+          promptForCustomYear();
+        });
+
+        dom.yearPillsBar.querySelectorAll('.pill-btn[data-year]').forEach(btn => {
           btn.addEventListener('click', () => {
             state.filterYear = btn.dataset.year;
             if (dom.filterYear) dom.filterYear.value = state.filterYear;
@@ -3513,7 +3598,7 @@
             updateYearPillsUI();
             if (dom.headerDateBadge) {
               dom.headerDateBadge.textContent = state.filterYear === 'ALL'
-                ? '📅 ข้อมูลเวลาปี 2022 - 2026 (ทุกปี)'
+                ? '📅 ข้อมูลเวลาทุกปี'
                 : `📅 ข้อมูลเวลาปี ${state.filterYear}`;
             }
             state.currentPage = 1;
@@ -3524,18 +3609,22 @@
 
       function updateYearPillsUI() {
         if (!dom.yearPillsBar) return;
-        dom.yearPillsBar.querySelectorAll('.pill-btn').forEach(btn => {
+        dom.yearPillsBar.querySelectorAll('.pill-btn[data-year]').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.year === state.filterYear);
         });
       }
 
       dom.filterYear.addEventListener('change', (e) => {
+        if (e.target.value === 'CUSTOM_YEAR') {
+          promptForCustomYear();
+          return;
+        }
         state.filterYear = e.target.value;
         saveFilterState();
         updateYearPillsUI();
         if (dom.headerDateBadge) {
           dom.headerDateBadge.textContent = state.filterYear === 'ALL'
-            ? '📅 ข้อมูลเวลาปี 2022 - 2026 (ทุกปี)'
+            ? '📅 ข้อมูลเวลาทุกปี'
             : `📅 ข้อมูลเวลาปี ${state.filterYear}`;
         }
         state.currentPage = 1;
@@ -3576,7 +3665,7 @@
         if (dom.filterYear) dom.filterYear.value = 'ALL';
         dom.filterMonth.value = 'ALL';
         dom.filterSearch.value = '';
-        if (dom.headerDateBadge) dom.headerDateBadge.textContent = '📅 ข้อมูลเวลาปี 2022 - 2026 (ทุกปี)';
+        if (dom.headerDateBadge) dom.headerDateBadge.textContent = '📅 ข้อมูลเวลาทุกปี';
         updateYearPillsUI();
         updateEmployeePillsUI();
         updateMonthPillsUI();
@@ -4872,7 +4961,7 @@
 
           dom.headerRecordsCount.textContent = `${state.records.length.toLocaleString()} รายการ`;
           dom.headerEmpCountBadge.textContent = `👥 พนักงาน ${state.employees.length} คน`;
-          dom.headerDateBadge.textContent = `📅 ข้อมูลเวลาปี 2022 - 2026 (ทุกปี)`;
+          dom.headerDateBadge.textContent = `📅 ข้อมูลเวลาทุกปี`;
           dom.btnResetDefaultData.style.display = 'none';
 
           showToast('🔄 คืนค่าข้อมูลเริ่มต้นเดิมเรียบร้อยแล้ว', 'warning');
@@ -4904,7 +4993,7 @@
       // Update header date badge dynamically on load
       if (dom.headerDateBadge) {
         dom.headerDateBadge.textContent = state.filterYear === 'ALL'
-          ? '📅 ข้อมูลเวลาปี 2022 - 2026 (ทุกปี)'
+          ? '📅 ข้อมูลเวลาทุกปี'
           : `📅 ข้อมูลเวลาปี ${state.filterYear}`;
       }
 
