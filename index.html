@@ -2142,7 +2142,6 @@
         <div class="brand-text">
           <h1>
             ระบบตรวจเช็คเวลาปฏิบัติงานพนักงาน
-            <span class="badge-no-thiti" id="header-thiti-badge">✂️ ตัด Thiti ออกแล้ว</span>
           </h1>
           <p>
             <span id="header-date-badge">📅 ข้อมูลเวลาทุกปี</span>
@@ -2158,41 +2157,31 @@
         <!-- Import Data Trigger (เด่นชัด) -->
         <button class="btn btn-primary" id="btn-open-import" title="นำเข้าไฟล์ Excel (.xlsx, .xls)">
           <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-            <path
-              d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
+            <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
           </svg>
-          <span>📥 นำเข้าข้อมูล (Import)</span>
+          นำเข้าข้อมูล (Import)
         </button>
 
-        <!-- Holiday Settings Trigger -->
-        <button class="btn" id="btn-open-holidays" title="ตั้งค่าวันหยุดประจำตัวและวันหยุดยิม">
-          <span>🏖️ จัดการวันหยุด & ตรวจสอบการลา</span>
-          <span class="badge badge-holiday" id="header-holiday-count" style="font-size:0.7rem; display:none;">0 วัน</span>
+        <!-- Holiday & Leave Settings Trigger -->
+        <button class="btn btn-warning" id="btn-open-holidays" title="จัดการวันหยุดประจำสัปดาห์ & วันหยุดยิม">
+          🏖️ จัดการวันหยุด & วันลา
         </button>
 
-        <!-- Export Cleaned Excel File -->
-        <button class="btn btn-success" id="btn-export-excel" title="ดาวน์โหลดไฟล์ Excel สะอาด (ไม่มี Thiti)">
-          <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+        <!-- Export Cleaned Excel Trigger -->
+        <button class="btn btn-success" id="btn-export-excel" title="ดาวน์โหลดไฟล์ Excel สะอาด">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
           </svg>
-          <span>ดาวน์โหลด Excel สะอาด</span>
+          ส่งออก Excel สะอาด
         </button>
 
-        <!-- Reset to default data button (แสดงเมื่อมีข้อมูลนำเข้า) -->
-        <button class="btn" id="btn-reset-default-data" title="กลับไปใช้ข้อมูลเริ่มต้นเดิม" style="display:none;">
-          <span>🔄 ข้อมูลเริ่มต้น</span>
-        </button>
-
-        <!-- Print -->
+        <!-- Print View -->
         <button class="btn" id="btn-print" title="พิมพ์รายงาน">
-          <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24">
-            <path
-              d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-4 11H9v-5h6v5zm4-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-3-9H8v3h8V3z" />
-          </svg>
+          🖨️ พิมพ์
         </button>
 
-        <!-- Theme Toggle -->
-        <button class="btn btn-icon-only" id="btn-theme-toggle" title="สลับโหมดมืด/สว่าง">
+        <!-- Dark/Light Theme Toggle -->
+        <button class="btn btn-icon-only" id="btn-theme-toggle" title="สลับโหมดกลางวัน/กลางคืน">
           🌙
         </button>
       </div>
@@ -2205,7 +2194,7 @@
         <div class="kpi-info">
           <h4>พนักงานที่แสดง</h4>
           <div class="kpi-value" id="kpi-val-emp">5 คน</div>
-          <div class="kpi-sub">ไม่มีชื่อ Thiti (ตัดออกแล้ว)</div>
+          <div class="kpi-sub">พนักงานทั้งหมดในระบบ</div>
         </div>
         <div class="kpi-icon-bubble bubble-purple">👥</div>
       </div>
@@ -2454,19 +2443,7 @@
       </div>
     </div>
 
-    <!-- Drag & Drop / New File Import Zone (ท้ายหน้า) -->
-    <div style="margin-top: 30px;">
-      <div class="drop-zone" id="excel-drop-zone">
-        <p style="font-size:0.95rem; font-weight:600; color:var(--text-main); margin-bottom:4px;">
-          📂 ต้องการนำเข้าไฟล์ Excel อื่นหรือไม่?
-        </p>
-        <p style="font-size:0.8rem; color:var(--text-muted);">
-          ลากไฟล์ Excel (.xlsx) มาวางที่นี่ หรือคลิกเพื่อเปิดหน้าต่างนำเข้าข้อมูล (ระบบจะตัดชื่อ <strong>Thiti</strong>
-          ออกให้อัตโนมัติทันที)
-        </p>
-        <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" style="display:none;">
-      </div>
-    </div>
+
 
   </div>
 
@@ -2935,7 +2912,6 @@
         btnCutThitiOnly: document.getElementById('btn-cut-thiti-only'),
         importOptExcludeThiti: document.getElementById('import-opt-exclude-thiti'),
         btnResetDefaultData: document.getElementById('btn-reset-default-data'),
-        headerThitiBadge: document.getElementById('header-thiti-badge'),
         headerDateBadge: document.getElementById('header-date-badge'),
         headerEmpCountBadge: document.getElementById('header-emp-count-badge'),
         headerRecordsCount: document.getElementById('header-records-count'),
@@ -2943,9 +2919,7 @@
 
         // Actions
         btnExportExcel: document.getElementById('btn-export-excel'),
-        btnPrint: document.getElementById('btn-print'),
-        excelDropZone: document.getElementById('excel-drop-zone'),
-        excelFileInput: document.getElementById('excel-file-input')
+        btnPrint: document.getElementById('btn-print')
       };
 
       // Theme Initialization
@@ -4507,10 +4481,6 @@
         openImportModal();
       });
 
-      // Also open modal when clicking bottom drop zone
-      dom.excelDropZone.addEventListener('click', () => {
-        openImportModal();
-      });
 
       function openImportModal() {
         pendingImportData = null;
@@ -4555,22 +4525,6 @@
         }
       });
 
-      // Also support drag & drop onto bottom zone directly
-      dom.excelDropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dom.excelDropZone.classList.add('dragover');
-      });
-      dom.excelDropZone.addEventListener('dragleave', () => {
-        dom.excelDropZone.classList.remove('dragover');
-      });
-      dom.excelDropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dom.excelDropZone.classList.remove('dragover');
-        if (e.dataTransfer.files.length > 0) {
-          openImportModal();
-          parseImportFile(e.dataTransfer.files[0]);
-        }
-      });
 
       // Quick Sample File Loader (.dat)
       const btnQuickSampleDat = document.getElementById('btn-quick-sample-dat');
