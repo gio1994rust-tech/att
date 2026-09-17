@@ -2010,31 +2010,46 @@
           </div>
         </div>
 
-        <!-- TAB 3: Official Holidays -->
+        <!-- TAB 3: Official Holidays & Custom Holidays -->
         <div class="modal-subtab-panel" id="tab-official-holidays">
           <!-- Add Custom Holiday Form -->
-          <div style="background:var(--bg-card-alt); padding:12px; border-radius:var(--radius-sm);">
+          <div style="background:var(--bg-card-alt); padding:14px; border-radius:var(--radius-sm); border:1px solid var(--border-color);">
             <label style="font-size:0.85rem; font-weight:600; color:var(--text-main); display:block; margin-bottom:8px;">
-              ➕ เพิ่มวันหยุดนักขัตฤกษ์ / ประเพณีเพิ่มเติม
+              ➕ เพิ่มวันหยุดนักขัตฤกษ์ / ประเพณีเพิ่มเติม (บันทึกถาวร)
             </label>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
               <input type="date" id="input-new-holiday-date" class="form-control" style="width:160px;">
               <input type="text" id="input-new-holiday-name" class="form-control" style="flex:1; min-width:160px;"
-                placeholder="ชื่อวันหยุด เช่น วันหยุดราชการพิเศษ...">
-              <button class="btn btn-primary" id="btn-add-holiday" style="padding:6px 14px;">+ เพิ่ม</button>
+                placeholder="ชื่อวันหยุด เช่น วันหยุดประเพณี, วันหยุดพิเศษ...">
+              <button type="button" class="btn btn-primary" id="btn-add-holiday" style="padding:6px 16px;">+ เพิ่ม</button>
             </div>
           </div>
 
-          <div>
+          <!-- Section: Custom Added Holidays -->
+          <div style="margin-top:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <label style="font-size:0.85rem; font-weight:600; color:var(--text-main);">
-                รายการวันหยุดนักขัตฤกษ์ทางการไทย
+              <label style="font-size:0.85rem; font-weight:600; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                <span>🎉</span>
+                <span>วันหยุดประเพณี / วันหยุดเพิ่มเติมที่เพิ่มเอง (<span id="modal-custom-holiday-count">0</span> วัน)</span>
               </label>
-              <button class="btn" id="btn-reset-default-holidays" style="padding:2px 8px; font-size:0.75rem;">
+            </div>
+            <div id="modal-custom-holidays-list" style="display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto;">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Section: Official Thai Holidays -->
+          <div style="margin-top:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <label style="font-size:0.85rem; font-weight:600; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                <span>🇹🇭</span>
+                <span>รายการวันหยุดนักขัตฤกษ์ทางการไทย (<span id="modal-official-default-count">0</span> วัน)</span>
+              </label>
+              <button type="button" class="btn" id="btn-reset-default-holidays" style="padding:2px 8px; font-size:0.75rem;">
                 รีเซ็ตค่าเริ่มต้น
               </button>
             </div>
-            <div class="holiday-list" id="modal-holidays-list">
+            <div class="holiday-list" id="modal-holidays-list" style="max-height:220px; overflow-y:auto;">
               <!-- Populated dynamically -->
             </div>
           </div>
@@ -2089,7 +2104,9 @@
       const DB_KEYS = {
         DAYOFFS: 'att_employee_dayoffs',
         GYM_HOLIDAYS: 'att_gym_holidays',
-        OFFICIAL_HOLIDAYS: 'att_official_holidays',
+        CUSTOM_HOLIDAYS: 'att_custom_official_holidays',
+        DELETED_OFFICIAL_HOLIDAYS: 'att_deleted_official_holidays',
+        DISABLED_OFFICIAL_HOLIDAYS: 'att_disabled_official_holidays',
         SAVED_FILTERS: 'att_saved_filters'
       };
 
@@ -2140,25 +2157,80 @@
         } catch (e) {}
       }
 
-      // Load persistent Official Holidays from LocalStorage
-      function loadOfficialHolidays() {
+      // Load persistent Custom Official Holidays from LocalStorage
+      function loadCustomOfficialHolidays() {
         try {
-          const raw = localStorage.getItem(DB_KEYS.OFFICIAL_HOLIDAYS);
+          const raw = localStorage.getItem(DB_KEYS.CUSTOM_HOLIDAYS);
           if (raw) {
             const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              return parsed;
+            if (Array.isArray(parsed)) return parsed;
+          }
+          // Migration from previous legacy storage key if present
+          const legacyRaw = localStorage.getItem('att_official_holidays');
+          if (legacyRaw) {
+            const legacyParsed = JSON.parse(legacyRaw);
+            if (Array.isArray(legacyParsed)) {
+              const defaultMap = new Map((window.ATTENDANCE_DATA.holidays || []).map(h => [h.date, h.name]));
+              const customItems = legacyParsed.filter(h => !defaultMap.has(h.date));
+              if (customItems.length > 0) {
+                return customItems.map(c => ({
+                  id: c.id || ('ch_' + Math.random().toString(36).substr(2, 9)),
+                  date: c.date,
+                  name: c.name,
+                  disabled: Boolean(c.disabled)
+                }));
+              }
             }
           }
         } catch (e) {
-          console.error("Failed to load official holidays", e);
+          console.error("Failed to load custom official holidays", e);
         }
-        return [...window.ATTENDANCE_DATA.holidays || []];
+        return [];
       }
 
-      function saveOfficialHolidaysToDB() {
+      function saveCustomOfficialHolidaysToDB() {
         try {
-          localStorage.setItem(DB_KEYS.OFFICIAL_HOLIDAYS, JSON.stringify(state.holidays));
+          localStorage.setItem(DB_KEYS.CUSTOM_HOLIDAYS, JSON.stringify(state.customOfficialHolidays));
+        } catch (e) {}
+      }
+
+      // Load persistent Deleted Official Holidays from LocalStorage
+      function loadDeletedOfficialHolidays() {
+        try {
+          const raw = localStorage.getItem(DB_KEYS.DELETED_OFFICIAL_HOLIDAYS);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) return new Set(parsed);
+          }
+        } catch (e) {
+          console.error("Failed to load deleted official holidays", e);
+        }
+        return new Set();
+      }
+
+      function saveDeletedOfficialHolidaysToDB() {
+        try {
+          localStorage.setItem(DB_KEYS.DELETED_OFFICIAL_HOLIDAYS, JSON.stringify(Array.from(state.deletedOfficialHolidays)));
+        } catch (e) {}
+      }
+
+      // Load persistent Disabled Official Holidays from LocalStorage
+      function loadDisabledOfficialHolidays() {
+        try {
+          const raw = localStorage.getItem(DB_KEYS.DISABLED_OFFICIAL_HOLIDAYS);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) return new Set(parsed);
+          }
+        } catch (e) {
+          console.error("Failed to load disabled official holidays", e);
+        }
+        return new Set();
+      }
+
+      function saveDisabledOfficialHolidaysToDB() {
+        try {
+          localStorage.setItem(DB_KEYS.DISABLED_OFFICIAL_HOLIDAYS, JSON.stringify(Array.from(state.disabledOfficialHolidays)));
         } catch (e) {}
       }
 
@@ -2192,12 +2264,14 @@
       // Application State
       const state = {
         employees: window.ATTENDANCE_DATA.employees || [],
-        holidays: loadOfficialHolidays(),
         records: [...window.ATTENDANCE_DATA.records || []],
         
         // Persistent database configurations
         employeeDayOffs: loadEmployeeDayOffs(),
         gymHolidays: loadGymHolidays(),
+        customOfficialHolidays: loadCustomOfficialHolidays(),
+        deletedOfficialHolidays: loadDeletedOfficialHolidays(),
+        disabledOfficialHolidays: loadDisabledOfficialHolidays(),
 
         // Filters (Restored from LocalStorage so filters stay preserved)
         filterEmployee: savedFilters?.filterEmployee !== undefined ? savedFilters.filterEmployee : 'ALL',
@@ -2410,12 +2484,24 @@
 
       function rebuildHolidayMaps() {
         officialHolidayMap.clear();
-        state.holidays.forEach(h => {
-          if (!h.disabled) {
+
+        // 1. Official Thai default holidays (from data.js)
+        const defaultHolidays = window.ATTENDANCE_DATA.holidays || [];
+        defaultHolidays.forEach(h => {
+          const key = h.date + '_' + h.name;
+          if (!state.deletedOfficialHolidays.has(key) && !state.disabledOfficialHolidays.has(key)) {
             officialHolidayMap.set(h.date, h.name);
           }
         });
 
+        // 2. Custom official / traditional holidays added by user
+        state.customOfficialHolidays.forEach(ch => {
+          if (!ch.disabled && ch.date) {
+            officialHolidayMap.set(ch.date, ch.name || 'วันหยุดประเพณี/พิเศษ');
+          }
+        });
+
+        // 3. Gym Holidays
         gymHolidayMap.clear();
         state.gymHolidays.forEach(gh => {
           if (gh.enabled !== false && gh.date) {
@@ -3398,45 +3484,132 @@
         rebuildHolidayMaps();
       }
 
-      function renderHolidaysModalList() {
-        dom.modalHolidaysList.innerHTML = '';
-        state.holidays.forEach((h, idx) => {
+      function renderCustomHolidaysList() {
+        const container = document.getElementById('modal-custom-holidays-list');
+        const countEl = document.getElementById('modal-custom-holiday-count');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!state.customOfficialHolidays || state.customOfficialHolidays.length === 0) {
+          container.innerHTML = `
+            <div style="text-align:center; padding:12px; color:var(--text-muted); font-size:0.8rem; background:var(--bg-card); border-radius:var(--radius-sm); border:1px dashed var(--border-color);">
+              ยังไม่มีการเพิ่มวันหยุดประเพณี/เพิ่มเติม (สามารถระบุวันที่และชื่อวันหยุดด้านบนเพื่อเพิ่มได้)
+            </div>
+          `;
+          if (countEl) countEl.textContent = '0';
+          return;
+        }
+
+        if (countEl) countEl.textContent = state.customOfficialHolidays.length;
+
+        state.customOfficialHolidays.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+        state.customOfficialHolidays.forEach((ch) => {
           const item = document.createElement('div');
-          item.className = 'holiday-item ' + (h.disabled ? 'inactive' : '');
+          item.className = 'holiday-item';
+          item.style.display = 'flex';
+          item.style.alignItems = 'center';
+          item.style.justifyContent = 'space-between';
+          item.style.padding = '8px 12px';
+          item.style.background = 'var(--bg-card)';
+          item.style.borderRadius = 'var(--radius-sm)';
+          item.style.border = '1px solid var(--border-color)';
+
+          const dParts = (ch.date || '').split('-');
+          const dateTh = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}/${dParts[0]}` : ch.date;
+
           item.innerHTML = `
             <div style="display:flex; align-items:center; gap:8px;">
-              <input type="checkbox" ${h.disabled ? '' : 'checked'} data-idx="${idx}">
-              <span style="font-family:'Inter'; font-weight:600;">${h.date}</span>
-              <span>- ${h.name}</span>
+              <span style="font-size:1rem;">🎉</span>
+              <strong style="font-family:'Inter'; font-size:0.88rem; color:var(--text-main);">${dateTh}</strong>
+              <span style="font-size:0.85rem; color:var(--text-muted); margin-left:4px;">- ${ch.name || 'วันหยุดเพิ่มเติม'}</span>
+              <span class="badge badge-holiday" style="font-size:0.68rem; margin-left:6px;">เพิ่มเอง</span>
             </div>
-            <button style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.8rem;" data-del="${idx}">
+            <button type="button" class="btn btn-icon-only" style="border:none; color:var(--danger); cursor:pointer; font-size:1rem;" title="ลบวันหยุดนี้ถาวร">
+              🗑️
+            </button>
+          `;
+
+          item.querySelector('button').addEventListener('click', () => {
+            if (confirm(`คุณต้องการลบวันหยุด "${ch.name}" (${dateTh}) หรือไม่? (จะถูกลบออกจากฐานข้อมูลถาวร และเปิดเว็บใหม่จะไม่แสดงอีก)`)) {
+              state.customOfficialHolidays = state.customOfficialHolidays.filter(x => x.id !== ch.id);
+              saveCustomOfficialHolidaysToDB();
+              renderCustomHolidaysList();
+              rebuildHolidayMaps();
+              renderAll();
+              showToast(`🗑️ ลบวันหยุด "${ch.name}" เรียบร้อย จะไม่แสดงขึ้นมาอีก`, 'success');
+            }
+          });
+
+          container.appendChild(item);
+        });
+      }
+
+      function renderHolidaysModalList() {
+        if (!dom.modalHolidaysList) return;
+        dom.modalHolidaysList.innerHTML = '';
+
+        const defaultList = (window.ATTENDANCE_DATA.holidays || []).filter(h => {
+          const key = h.date + '_' + h.name;
+          return !state.deletedOfficialHolidays.has(key);
+        });
+
+        const countEl = document.getElementById('modal-official-default-count');
+        if (countEl) countEl.textContent = defaultList.length;
+
+        defaultList.forEach((h) => {
+          const key = h.date + '_' + h.name;
+          const isDisabled = state.disabledOfficialHolidays.has(key);
+
+          const item = document.createElement('div');
+          item.className = 'holiday-item ' + (isDisabled ? 'inactive' : '');
+
+          const dParts = (h.date || '').split('-');
+          const dateTh = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}/${dParts[0]}` : h.date;
+
+          item.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" ${isDisabled ? '' : 'checked'} style="cursor:pointer; width:16px; height:16px;">
+              <span style="font-family:'Inter'; font-weight:600; font-size:0.88rem;">${dateTh}</span>
+              <span style="font-size:0.85rem;">- ${h.name}</span>
+            </div>
+            <button type="button" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.8rem;" title="ลบวันหยุดนี้ถาวร">
               ลบ
             </button>
           `;
 
           item.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
-            state.holidays[idx].disabled = !e.target.checked;
-            saveOfficialHolidaysToDB();
+            if (e.target.checked) {
+              state.disabledOfficialHolidays.delete(key);
+            } else {
+              state.disabledOfficialHolidays.add(key);
+            }
+            saveDisabledOfficialHolidaysToDB();
             renderHolidaysModalList();
+            rebuildHolidayMaps();
             renderAll();
           });
 
-          item.querySelector('button[data-del]').addEventListener('click', () => {
-            state.holidays.splice(idx, 1);
-            saveOfficialHolidaysToDB();
-            renderHolidaysModalList();
-            renderAll();
+          item.querySelector('button').addEventListener('click', () => {
+            if (confirm(`คุณต้องการลบวันหยุด "${h.name}" (${dateTh}) ออกจากระบบหรือไม่? (เมื่อลบแล้วจะไม่แสดงขึ้นมาอีก)`)) {
+              state.deletedOfficialHolidays.add(key);
+              saveDeletedOfficialHolidaysToDB();
+              renderHolidaysModalList();
+              rebuildHolidayMaps();
+              renderAll();
+              showToast(`🗑️ ลบวันหยุด "${h.name}" เรียบร้อย จะไม่แสดงขึ้นมาอีก`, 'success');
+            }
           });
 
           dom.modalHolidaysList.appendChild(item);
         });
-        rebuildHolidayMaps();
       }
 
       // Open Modal Handler
       dom.btnOpenHolidays.addEventListener('click', () => {
         renderStaffDayOffsUI();
         renderGymHolidaysListUI();
+        renderCustomHolidaysList();
         renderHolidaysModalList();
         dom.holidayModal.classList.add('open');
       });
@@ -3494,25 +3667,37 @@
           alert('กรุณาระบุชื่อวันหยุด');
           return;
         }
-        state.holidays.push({ date: d, name: n, disabled: false });
-        state.holidays.sort((a, b) => a.date.localeCompare(b.date));
-        saveOfficialHolidaysToDB();
+
+        const newCustom = {
+          id: 'ch_' + Date.now(),
+          date: d,
+          name: n,
+          disabled: false
+        };
+
+        state.customOfficialHolidays.push(newCustom);
+        saveCustomOfficialHolidaysToDB();
+
         dom.inputNewHolidayDate.value = '';
         dom.inputNewHolidayName.value = '';
-        renderHolidaysModalList();
+
+        renderCustomHolidaysList();
+        rebuildHolidayMaps();
         renderAll();
-        showToast(`✅ เพิ่มวันหยุด "${n}" เรียบร้อย`, 'success');
+        showToast(`✅ เพิ่มวันหยุด "${n}" บันทึกลงฐานข้อมูลเรียบร้อย`, 'success');
       });
 
       // Reset default official holidays
       dom.btnResetDefaultHolidays.addEventListener('click', () => {
-        if (confirm('คุณต้องการรีเซ็ตวันหยุดนักขัตฤกษ์เป็นค่าเริ่มต้นหรือไม่?')) {
-          state.holidays = JSON.parse(JSON.stringify(window.ATTENDANCE_DATA.holidays || []));
-          saveOfficialHolidaysToDB();
+        if (confirm('คุณต้องการรีเซ็ตวันหยุดนักขัตฤกษ์ทางการไทยกลับเป็นค่าเริ่มต้นเดิมหรือไม่? (วันหยุดประเพณีที่คุณเพิ่มเองจะยังคงอยู่)')) {
+          state.deletedOfficialHolidays.clear();
+          state.disabledOfficialHolidays.clear();
+          saveDeletedOfficialHolidaysToDB();
+          saveDisabledOfficialHolidaysToDB();
           renderHolidaysModalList();
           rebuildHolidayMaps();
           renderAll();
-          showToast('🔄 รีเซ็ตวันหยุดนักขัตฤกษ์เรียบร้อย', 'success');
+          showToast('🔄 รีเซ็ตวันหยุดนักขัตฤกษ์ทางการไทยเรียบร้อย', 'success');
         }
       });
 
@@ -3531,7 +3716,9 @@
       dom.btnSaveHolidays.addEventListener('click', () => {
         saveEmployeeDayOffsToDB();
         saveGymHolidaysToDB();
-        saveOfficialHolidaysToDB();
+        saveCustomOfficialHolidaysToDB();
+        saveDeletedOfficialHolidaysToDB();
+        saveDisabledOfficialHolidaysToDB();
         rebuildHolidayMaps();
         dom.holidayModal.classList.remove('open');
         renderAll();
