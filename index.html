@@ -252,6 +252,27 @@
       background: #059669;
     }
 
+    .btn-danger {
+      background: var(--danger);
+      color: #ffffff;
+      border-color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-danger-outline {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      transition: var(--transition);
+    }
+
+    .btn-danger-outline:hover {
+      background: var(--danger-light);
+    }
+
     .btn-icon-only {
       width: 38px;
       height: 38px;
@@ -537,6 +558,38 @@
       box-shadow: 0 0 0 1px var(--primary);
     }
 
+    /* Leave Type Buttons */
+    .btn-leave-choice {
+      padding: 7px 10px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      color: var(--text-main);
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      user-select: none;
+    }
+
+    .btn-leave-choice:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .btn-leave-choice.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 5px rgba(79, 70, 229, 0.25);
+    }
+
     /* View Switcher Tabs */
     .view-tabs-container {
       display: flex;
@@ -813,6 +866,66 @@
       border: 1px solid var(--border-color);
     }
 
+    .badge-sick {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .badge-vacation {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+
+    .badge-business {
+      background: #faf5ff;
+      color: #7e22ce;
+      border: 1px solid #e9d5ff;
+    }
+
+    .badge-maternity {
+      background: #fdf2f8;
+      color: #be185d;
+      border: 1px solid #fbcfe8;
+    }
+
+    .badge-other {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+
+    [data-theme="dark"] .badge-sick {
+      background: #450a0a;
+      color: #fca5a5;
+      border-color: #7f1d1d;
+    }
+
+    [data-theme="dark"] .badge-vacation {
+      background: #064e3b;
+      color: #a7f3d0;
+      border-color: #047857;
+    }
+
+    [data-theme="dark"] .badge-business {
+      background: #3b0764;
+      color: #d8b4fe;
+      border-color: #581c87;
+    }
+
+    [data-theme="dark"] .badge-maternity {
+      background: #500724;
+      color: #f472b6;
+      border-color: #831843;
+    }
+
+    [data-theme="dark"] .badge-other {
+      background: #1e293b;
+      color: #cbd5e1;
+      border-color: #334155;
+    }
+
     .punch-time-badge {
       display: inline-block;
       padding: 2px 7px;
@@ -962,6 +1075,21 @@
     .calendar-day-cell.is-leave {
       border-left: 4px solid var(--danger);
       background: rgba(239, 68, 68, 0.06);
+    }
+
+    .calendar-day-cell.is-leave.is-sick {
+      border-left: 4px solid #ef4444;
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    .calendar-day-cell.is-leave.is-vacation {
+      border-left: 4px solid #10b981;
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .calendar-day-cell.is-leave.is-business {
+      border-left: 4px solid #8b5cf6;
+      background: rgba(139, 92, 246, 0.08);
     }
 
     .calendar-day-cell.is-holiday {
@@ -1697,7 +1825,16 @@
           🟡 ลืมสแกน (1 ครั้ง)
         </button>
         <button class="status-btn" data-status="leave" style="border-color:var(--danger); color:var(--danger);">
-          🔴 วันลา / ขาดงาน (ไม่มีสแกนในวันทำงาน)
+          🔴 วันลาทั้งหมด
+        </button>
+        <button class="status-btn" data-status="sick">
+          🩺 ลาป่วย
+        </button>
+        <button class="status-btn" data-status="vacation">
+          🏖️ ลาพักร้อน
+        </button>
+        <button class="status-btn" data-status="business">
+          📋 ลากิจ
         </button>
         <button class="status-btn" data-status="holiday">
           🏖️ วันหยุด & สุดสัปดาห์
@@ -2074,7 +2211,7 @@
 
   <!-- Day Detail Popover Modal -->
   <div class="modal-backdrop" id="day-detail-modal">
-    <div class="modal-box" style="max-width:440px;">
+    <div class="modal-box" style="max-width:520px;">
       <div class="modal-header">
         <h3 id="day-modal-title">รายละเอียดการลงเวลา</h3>
         <button class="btn btn-icon-only" id="btn-close-day-modal" style="border:none; font-size:1.2rem;">✕</button>
@@ -2107,8 +2244,31 @@
         CUSTOM_HOLIDAYS: 'att_custom_official_holidays',
         DELETED_OFFICIAL_HOLIDAYS: 'att_deleted_official_holidays',
         DISABLED_OFFICIAL_HOLIDAYS: 'att_disabled_official_holidays',
-        SAVED_FILTERS: 'att_saved_filters'
+        SAVED_FILTERS: 'att_saved_filters',
+        LEAVE_REASONS: 'att_leave_reasons'
       };
+
+      // Load persistent Leave Reasons from LocalStorage
+      function loadLeaveReasons() {
+        try {
+          const raw = localStorage.getItem(DB_KEYS.LEAVE_REASONS);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (typeof parsed === 'object' && parsed !== null) return parsed;
+          }
+        } catch (e) {
+          console.error("Failed to load leave reasons", e);
+        }
+        return {};
+      }
+
+      function saveLeaveReasonsToDB() {
+        try {
+          localStorage.setItem(DB_KEYS.LEAVE_REASONS, JSON.stringify(state.leaveReasons));
+        } catch (e) {
+          console.error("Failed to save leave reasons", e);
+        }
+      }
 
       // Default Empirical Day-Offs for known staff (0=จันทร์, 1=อังคาร, 2=พุธ, 3=พฤหัส, 4=ศุกร์, 5=เสาร์, 6=อาทิตย์)
       const DEFAULT_STAFF_DAYOFFS = {
@@ -2272,6 +2432,7 @@
         customOfficialHolidays: loadCustomOfficialHolidays(),
         deletedOfficialHolidays: loadDeletedOfficialHolidays(),
         disabledOfficialHolidays: loadDisabledOfficialHolidays(),
+        leaveReasons: loadLeaveReasons(),
 
         // Filters (Restored from LocalStorage so filters stay preserved)
         filterEmployee: savedFilters?.filterEmployee !== undefined ? savedFilters.filterEmployee : 'ALL',
@@ -2518,11 +2679,13 @@
       rebuildHolidayMaps();
 
       // Determine Date Status
-      // Returns: { status: 'normal' | 'single_punch' | 'leave' | 'holiday', label: string, badgeClass: string, isHoliday: boolean, holidayName: string, isPersonalDayOff: boolean }
+      // Returns: { status: 'normal' | 'single_punch' | 'leave' | 'holiday', leaveType: string|null, leaveLabel: string, leaveNote: string, label: string, badgeClass: string, isHoliday: boolean, holidayName: string, isPersonalDayOff: boolean }
       function evaluateRecordStatus(record) {
         const isoDate = record.isoDate;
         const dayOfWeek = record.dayOfWeek; // 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
         const empId = record.empId;
+        const leaveKey = `${empId}_${isoDate}`;
+        const savedLeave = state.leaveReasons ? state.leaveReasons[leaveKey] : null;
 
         // 1. Employee's personal weekly day-off
         const empDayOffs = state.employeeDayOffs[empId] !== undefined 
@@ -2547,9 +2710,46 @@
           holidayDisplayName = `🏖️ วันหยุดประจำตัว (วัน${dayName})`;
         }
 
+        // If a specific leave reason is explicitly registered by user for this date:
+        if (savedLeave) {
+          let badgeClass = 'badge-danger';
+          let icon = '🔴';
+          if (savedLeave.type === 'sick') {
+            badgeClass = 'badge-sick';
+            icon = '🩺';
+          } else if (savedLeave.type === 'vacation') {
+            badgeClass = 'badge-vacation';
+            icon = '🏖️';
+          } else if (savedLeave.type === 'business') {
+            badgeClass = 'badge-business';
+            icon = '📋';
+          } else if (savedLeave.type === 'maternity') {
+            badgeClass = 'badge-maternity';
+            icon = '👶';
+          } else if (savedLeave.type === 'other') {
+            badgeClass = 'badge-other';
+            icon = '📝';
+          }
+          const noteSuffix = savedLeave.note ? ` (${savedLeave.note})` : '';
+          return {
+            status: 'leave',
+            leaveType: savedLeave.type,
+            leaveLabel: savedLeave.label || 'ลางาน',
+            leaveNote: savedLeave.note || '',
+            label: `${icon} ${savedLeave.label || 'ลางาน'}${noteSuffix}`,
+            badgeClass: badgeClass,
+            isHoliday: isAnyHoliday,
+            holidayName: holidayDisplayName,
+            isPersonalDayOff: isPersonalDayOff
+          };
+        }
+
         if (record.count >= 2) {
           return {
             status: 'normal',
+            leaveType: null,
+            leaveLabel: '',
+            leaveNote: '',
             label: 'มาทำงานปกติ',
             badgeClass: 'badge-success',
             isHoliday: isAnyHoliday,
@@ -2559,6 +2759,9 @@
         } else if (record.count === 1) {
           return {
             status: 'single_punch',
+            leaveType: null,
+            leaveLabel: '',
+            leaveNote: '',
             label: 'ลืมสแกน (1 ครั้ง)',
             badgeClass: 'badge-warning',
             isHoliday: isAnyHoliday,
@@ -2570,6 +2773,9 @@
           if (isAnyHoliday) {
             return {
               status: 'holiday',
+              leaveType: null,
+              leaveLabel: '',
+              leaveNote: '',
               label: holidayDisplayName || 'วันหยุด',
               badgeClass: 'badge-holiday',
               isHoliday: true,
@@ -2580,6 +2786,9 @@
             // Not a holiday, not personal day off, but NO scan!
             return {
               status: 'leave',
+              leaveType: 'unspecified',
+              leaveLabel: 'ขาด / ลา',
+              leaveNote: '',
               label: '🔴 คาดว่าลางาน / ขาด',
               badgeClass: 'badge-danger',
               isHoliday: false,
@@ -2613,13 +2822,16 @@
             return false;
           }
 
-          // Status filter (Evaluated dynamically based on holidays)
+          // Status filter (Evaluated dynamically based on holidays & leave reasons)
           const evaluation = evaluateRecordStatus(r);
           if (state.filterStatus !== 'ALL') {
             if (state.filterStatus === 'leave' && evaluation.status !== 'leave') return false;
             if (state.filterStatus === 'normal' && evaluation.status !== 'normal') return false;
             if (state.filterStatus === 'single_punch' && evaluation.status !== 'single_punch') return false;
             if (state.filterStatus === 'holiday' && evaluation.status !== 'holiday') return false;
+            if (state.filterStatus === 'sick' && (evaluation.status !== 'leave' || evaluation.leaveType !== 'sick')) return false;
+            if (state.filterStatus === 'vacation' && (evaluation.status !== 'leave' || evaluation.leaveType !== 'vacation')) return false;
+            if (state.filterStatus === 'business' && (evaluation.status !== 'leave' || evaluation.leaveType !== 'business')) return false;
           }
 
           // Text Search
@@ -2648,12 +2860,20 @@
         let countSingle = 0;
         let countLeave = 0;
         let countHoliday = 0;
+        let countSick = 0;
+        let countVacation = 0;
+        let countBusiness = 0;
 
         filtered.forEach(r => {
           const evalRes = evaluateRecordStatus(r);
           if (evalRes.status === 'normal') countNormal++;
           else if (evalRes.status === 'single_punch') countSingle++;
-          else if (evalRes.status === 'leave') countLeave++;
+          else if (evalRes.status === 'leave') {
+            countLeave++;
+            if (evalRes.leaveType === 'sick') countSick++;
+            else if (evalRes.leaveType === 'vacation') countVacation++;
+            else if (evalRes.leaveType === 'business') countBusiness++;
+          }
           else if (evalRes.status === 'holiday') countHoliday++;
         });
 
@@ -2664,6 +2884,17 @@
         dom.kpiValSingle.textContent = `${countSingle.toLocaleString()} วัน`;
         dom.kpiValLeave.textContent = `${countLeave.toLocaleString()} วัน`;
         dom.kpiValHoliday.textContent = `${countHoliday.toLocaleString()} วัน`;
+
+        const kpiLeaveSub = dom.kpiLeave?.querySelector('.kpi-sub');
+        if (kpiLeaveSub) {
+          const breakdown = [];
+          if (countSick > 0) breakdown.push(`🩺 ป่วย ${countSick}`);
+          if (countVacation > 0) breakdown.push(`🏖️ พักร้อน ${countVacation}`);
+          if (countBusiness > 0) breakdown.push(`📋 กิจ ${countBusiness}`);
+          kpiLeaveSub.textContent = breakdown.length > 0
+            ? breakdown.join(' | ')
+            : 'วันทำงานแต่ไม่มีสแกน';
+        }
 
         dom.viewResultSummary.textContent = `พบข้อมูล ${filtered.length.toLocaleString()} รายการ (จากทั้งหมด ${state.records.length.toLocaleString()})`;
       }
@@ -2685,7 +2916,11 @@
             totalScans: 0,
             inTimes: [],
             outTimes: [],
-            totalWorkHours: 0
+            totalWorkHours: 0,
+            sickDays: 0,
+            vacationDays: 0,
+            businessDays: 0,
+            otherDays: 0
           };
         });
 
@@ -2706,6 +2941,10 @@
             if (r.checkIn) g.inTimes.push(r.checkIn);
           } else if (evalRes.status === 'leave') {
             g.leaveDays++;
+            if (evalRes.leaveType === 'sick') g.sickDays++;
+            else if (evalRes.leaveType === 'vacation') g.vacationDays++;
+            else if (evalRes.leaveType === 'business') g.businessDays++;
+            else if (evalRes.leaveType && evalRes.leaveType !== 'unspecified') g.otherDays++;
           } else if (evalRes.status === 'holiday') {
             g.holidayDays++;
           }
@@ -2747,8 +2986,15 @@
                   <div class="stat-num" style="color:var(--warning);">${g.singleDays} วัน</div>
                 </div>
                 <div class="emp-stat-box">
-                  <div class="stat-label">🔴 คาดว่าลางาน</div>
+                  <div class="stat-label">🔴 คาดว่าลางาน / ขาด</div>
                   <div class="stat-num" style="color:var(--danger);">${g.leaveDays} วัน</div>
+                  ${(g.sickDays + g.vacationDays + g.businessDays + g.otherDays) > 0 ? `
+                    <div style="margin-top:4px; display:flex; flex-wrap:wrap; gap:3px;">
+                      ${g.sickDays > 0 ? `<span class="badge badge-sick" style="font-size:0.65rem; padding:1px 5px;">🩺 ป่วย ${g.sickDays}</span>` : ''}
+                      ${g.vacationDays > 0 ? `<span class="badge badge-vacation" style="font-size:0.65rem; padding:1px 5px;">🏖️ พักร้อน ${g.vacationDays}</span>` : ''}
+                      ${g.businessDays > 0 ? `<span class="badge badge-business" style="font-size:0.65rem; padding:1px 5px;">📋 กิจ ${g.businessDays}</span>` : ''}
+                    </div>
+                  ` : ''}
                 </div>
                 <div class="emp-stat-box">
                   <div class="stat-label">สแกนทั้งหมด</div>
@@ -2954,19 +3200,37 @@
             if (evalRes.status === 'normal') statusClass = 'is-normal';
             else if (evalRes.status === 'single_punch') statusClass = 'is-single';
             else if (evalRes.status === 'holiday') statusClass = 'is-holiday';
-            else if (evalRes.status === 'leave') statusClass = 'is-leave';
+            else if (evalRes.status === 'leave') {
+              if (evalRes.leaveType === 'sick') statusClass = 'is-leave is-sick';
+              else if (evalRes.leaveType === 'vacation') statusClass = 'is-leave is-vacation';
+              else if (evalRes.leaveType === 'business') statusClass = 'is-leave is-business';
+              else statusClass = 'is-leave';
+            }
 
-            cell.classList.add(statusClass);
+            cell.classList.add(...statusClass.split(' '));
+
+            let badgeLabel = 'หยุด';
+            if (evalRes.status === 'normal') badgeLabel = 'มาปกติ';
+            else if (evalRes.status === 'single_punch') badgeLabel = 'ลืมสแกน';
+            else if (evalRes.status === 'holiday') badgeLabel = 'หยุด';
+            else if (evalRes.status === 'leave') {
+              if (evalRes.leaveType === 'sick') badgeLabel = '🩺 ลาป่วย';
+              else if (evalRes.leaveType === 'vacation') badgeLabel = '🏖️ พักร้อน';
+              else if (evalRes.leaveType === 'business') badgeLabel = '📋 ลากิจ';
+              else if (evalRes.leaveType === 'maternity') badgeLabel = '👶 ลาคลอด';
+              else if (evalRes.leaveType === 'other') badgeLabel = '📝 อื่นๆ';
+              else badgeLabel = '🔴 ลา';
+            }
 
             cell.innerHTML = `
               <div class="cell-top">
                 <span class="cell-date-num">${day}</span>
-                <span class="cell-badge ${evalRes.badgeClass}">${evalRes.status === 'normal' ? 'มาปกติ' : (evalRes.status === 'single_punch' ? 'ลืมสแกน' : (evalRes.status === 'leave' ? '🔴 ลา' : 'หยุด'))}</span>
+                <span class="cell-badge ${evalRes.badgeClass}">${badgeLabel}</span>
               </div>
               <div class="cell-body">
                 ${rec.checkIn ? `<div class="cell-time-line"><span>เข้า:</span> <strong>${rec.checkIn}</strong></div>` : ''}
                 ${rec.checkOut ? `<div class="cell-time-line"><span>ออก:</span> <strong>${rec.checkOut}</strong></div>` : ''}
-                ${!rec.checkIn && !rec.checkOut ? `<div style="color:var(--text-light); font-size:0.7rem;">${evalRes.holidayName || 'ไม่มีการสแกน'}</div>` : ''}
+                ${!rec.checkIn && !rec.checkOut ? `<div style="color:var(--text-light); font-size:0.7rem; line-height:1.2;">${evalRes.label || evalRes.holidayName || 'ไม่มีการสแกน'}</div>` : ''}
               </div>
             `;
 
@@ -2979,8 +3243,11 @@
         }
       }
 
-      // Day Detail Modal
+      // Day Detail Modal with Leave Reason Editor
       function openDayDetailModal(record, evalRes) {
+        const leaveKey = `${record.empId}_${record.isoDate}`;
+        const savedLeave = state.leaveReasons ? state.leaveReasons[leaveKey] : null;
+
         dom.dayModalTitle.textContent = `📅 วันที่ ${record.date} (${record.empName})`;
 
         let punchesDetail = '';
@@ -2992,30 +3259,160 @@
             </div>
           `).join('');
         } else {
-          punchesDetail = `<p style="color:var(--text-muted); font-size:0.85rem;">ไม่มีข้อมูลการสแกนเวลาในวันนี้</p>`;
+          punchesDetail = `<p style="color:var(--text-muted); font-size:0.85rem; margin:4px 0;">ไม่มีข้อมูลการสแกนเวลาในวันนี้</p>`;
         }
 
+        let currentType = savedLeave ? savedLeave.type : (evalRes.status === 'leave' && evalRes.leaveType && evalRes.leaveType !== 'unspecified' ? evalRes.leaveType : '');
+        let currentNote = savedLeave ? (savedLeave.note || '') : '';
+
         dom.dayModalContent.innerHTML = `
-          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
             <span class="badge ${evalRes.badgeClass}" style="font-size:0.85rem; padding:4px 12px;">
               สถานะ: ${evalRes.label}
             </span>
             ${evalRes.holidayName ? `<span class="badge badge-holiday">${evalRes.holidayName}</span>` : ''}
           </div>
 
-          <div style="background:var(--bg-card-alt); padding:12px; border-radius:var(--radius-sm); margin-bottom:14px; font-size:0.85rem;">
+          <div style="background:var(--bg-card-alt); padding:10px 14px; border-radius:var(--radius-sm); margin-bottom:12px; font-size:0.85rem;">
             <div><strong>พนักงาน:</strong> ${record.empName} (รหัส ${record.empId})</div>
             <div style="margin-top:4px;"><strong>เวลาทำงานโดยประมาณ:</strong> ${record.workHoursFormatted || '-'}</div>
             <div style="margin-top:4px;"><strong>จำนวนครั้งที่บันทึก:</strong> ${record.count} ครั้ง</div>
           </div>
 
-          <h4 style="font-size:0.85rem; font-weight:600; margin-bottom:8px; color:var(--text-muted);">
-            ประวัติการสแกนทั้งหมดในวันนี้:
-          </h4>
-          <div style="max-height:160px; overflow-y:auto;">
-            ${punchesDetail}
+          <div style="margin-bottom:12px;">
+            <h4 style="font-size:0.82rem; font-weight:600; margin-bottom:6px; color:var(--text-muted);">
+              ประวัติการสแกนทั้งหมดในวันนี้:
+            </h4>
+            <div style="max-height:100px; overflow-y:auto; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:6px 10px;">
+              ${punchesDetail}
+            </div>
+          </div>
+
+          <!-- Leave Reason Configuration Section -->
+          <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:14px; box-shadow:var(--shadow-sm);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <div style="font-weight:600; font-size:0.88rem; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                <span>📝</span> เหตุผล / ประเภทการลาสำหรับวันนี้
+              </div>
+              ${savedLeave 
+                ? `<span class="badge badge-success" style="font-size:0.7rem; padding:2px 8px;">✔️ บันทึกแล้ว</span>` 
+                : `<span style="font-size:0.72rem; color:var(--text-muted);">ยังไม่ได้ระบุ</span>`}
+            </div>
+
+            <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:10px; line-height:1.4;">
+              เลือกประเภทการลาเพื่อบันทึกลงระบบ (มีผลต่อการคำนวณวันลา, สีในปฏิทิน และไฟล์ Excel):
+            </p>
+
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:10px;" id="modal-leave-choice-group">
+              <button type="button" class="btn-leave-choice ${currentType === 'sick' ? 'active' : ''}" data-type="sick" data-label="ลาป่วย">
+                🩺 ลาป่วย
+              </button>
+              <button type="button" class="btn-leave-choice ${currentType === 'vacation' ? 'active' : ''}" data-type="vacation" data-label="ลาพักร้อน">
+                🏖️ ลาพักร้อน
+              </button>
+              <button type="button" class="btn-leave-choice ${currentType === 'business' ? 'active' : ''}" data-type="business" data-label="ลากิจ">
+                📋 ลากิจ
+              </button>
+              <button type="button" class="btn-leave-choice ${currentType === 'maternity' ? 'active' : ''}" data-type="maternity" data-label="ลาคลอด">
+                👶 ลาคลอด
+              </button>
+              <button type="button" class="btn-leave-choice ${currentType === 'other' ? 'active' : ''}" data-type="other" data-label="ลาอื่นๆ">
+                📝 ลาอื่นๆ
+              </button>
+              <button type="button" class="btn-leave-choice ${!currentType ? 'active' : ''}" data-type="" data-label="ไม่ระบุ" style="color:var(--text-muted);">
+                ⚪ ไม่ระบุ
+              </button>
+            </div>
+
+            <div style="margin-bottom:12px;">
+              <label style="display:block; font-size:0.78rem; font-weight:500; color:var(--text-muted); margin-bottom:4px;">
+                หมายเหตุ / รายละเอียดเพิ่มเติม:
+              </label>
+              <input type="text" id="modal-leave-note-input" class="filter-input" placeholder="เช่น มีใบรับรองแพทย์, ติดต่อราชการ..." value="${currentNote.replace(/"/g, '&quot;')}" style="width:100%; font-size:0.85rem; padding:6px 10px;" />
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+              ${savedLeave ? `
+                <button type="button" class="btn btn-danger-outline" id="btn-modal-delete-leave" style="font-size:0.8rem; padding:6px 12px;">
+                  🗑️ ยกเลิกการลา
+                </button>
+              ` : ''}
+              <button type="button" class="btn btn-primary" id="btn-modal-save-leave" style="font-size:0.8rem; padding:6px 14px;">
+                💾 บันทึกเหตุผลการลา
+              </button>
+            </div>
           </div>
         `;
+
+        // Wire up leave choice buttons
+        let selectedLeaveType = currentType;
+        const choiceBtns = dom.dayModalContent.querySelectorAll('.btn-leave-choice');
+        choiceBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            selectedLeaveType = btn.dataset.type;
+            choiceBtns.forEach(b => b.classList.toggle('active', b.dataset.type === selectedLeaveType));
+          });
+        });
+
+        // Wire up Save Button
+        const saveBtn = dom.dayModalContent.querySelector('#btn-modal-save-leave');
+        if (saveBtn) {
+          saveBtn.addEventListener('click', () => {
+            const noteInput = dom.dayModalContent.querySelector('#modal-leave-note-input');
+            const note = noteInput ? noteInput.value.trim() : '';
+
+            if (!selectedLeaveType) {
+              if (state.leaveReasons && state.leaveReasons[leaveKey]) {
+                delete state.leaveReasons[leaveKey];
+                saveLeaveReasonsToDB();
+                renderAll();
+                const updatedEval = evaluateRecordStatus(record);
+                openDayDetailModal(record, updatedEval);
+                showToast('🔄 ยกเลิกเหตุผลการลาและคืนค่าเดิมเรียบร้อย', 'info');
+              } else {
+                alert('กรุณาเลือกประเภทการลา (เช่น ลาป่วย, ลาพักร้อน, ลากิจ)');
+              }
+              return;
+            }
+
+            const typeLabels = {
+              sick: 'ลาป่วย',
+              vacation: 'ลาพักร้อน',
+              business: 'ลากิจ',
+              maternity: 'ลาคลอด',
+              other: 'ลาอื่นๆ'
+            };
+
+            if (!state.leaveReasons) state.leaveReasons = {};
+            state.leaveReasons[leaveKey] = {
+              type: selectedLeaveType,
+              label: typeLabels[selectedLeaveType] || 'ลางาน',
+              note: note,
+              updatedAt: new Date().toISOString()
+            };
+
+            saveLeaveReasonsToDB();
+            renderAll();
+            const updatedEval = evaluateRecordStatus(record);
+            openDayDetailModal(record, updatedEval);
+            showToast(`✅ บันทึก "${typeLabels[selectedLeaveType]}" (${record.empName}) เรียบร้อยแล้ว`, 'success');
+          });
+        }
+
+        // Wire up Delete / Clear Button
+        const deleteBtn = dom.dayModalContent.querySelector('#btn-modal-delete-leave');
+        if (deleteBtn) {
+          deleteBtn.addEventListener('click', () => {
+            if (state.leaveReasons && state.leaveReasons[leaveKey]) {
+              delete state.leaveReasons[leaveKey];
+              saveLeaveReasonsToDB();
+              renderAll();
+              const updatedEval = evaluateRecordStatus(record);
+              openDayDetailModal(record, updatedEval);
+              showToast(`🗑️ ลบข้อมูลเหตุผลการลาของวันที่ ${record.date} เรียบร้อยแล้ว`, 'info');
+            }
+          });
+        }
 
         dom.dayDetailModal.classList.add('open');
       }
