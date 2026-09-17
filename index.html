@@ -1580,31 +1580,552 @@
       }
     }
 
-    /* Responsive adjustments */
+    /* Desktop defaults for mobile helper tags */
+    .mobile-td-label {
+      display: none;
+    }
+    .tab-text-short {
+      display: none;
+    }
+
+    /* Comprehensive Mobile Responsiveness (ขนาดพอดี ไม่ตกขอบ ไม่ต้องเลื่อนด้านข้าง) */
     @media (max-width: 768px) {
+      html, body {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+        -webkit-text-size-adjust: 100%;
+      }
+
       .app-container {
-        padding: 12px 14px;
+        padding: 10px 12px 40px !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+      }
+
+      /* Top Header */
+      header.app-header {
+        padding: 12px 14px !important;
+        margin-bottom: 14px !important;
+        border-radius: var(--radius-md) !important;
+        gap: 12px !important;
+      }
+
+      .brand-section {
+        width: 100% !important;
+        gap: 10px !important;
+      }
+
+      .brand-icon {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 20px !important;
+        flex-shrink: 0 !important;
       }
 
       .brand-text h1 {
-        font-size: 1.05rem;
+        font-size: 0.98rem !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
       }
 
-      .calendar-grid {
-        gap: 4px;
+      .badge-no-thiti {
+        font-size: 0.65rem !important;
+        padding: 1px 6px !important;
       }
 
-      .calendar-day-cell {
-        min-height: 65px;
-        padding: 4px;
+      .brand-text p {
+        font-size: 0.72rem !important;
+        flex-wrap: wrap !important;
+        gap: 4px !important;
+        line-height: 1.3 !important;
       }
 
-      .cell-time-line {
-        font-size: 0.65rem;
+      .header-actions {
+        width: 100% !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+      }
+
+      .header-actions .btn {
+        padding: 7px 10px !important;
+        font-size: 0.78rem !important;
+        flex: 1 1 calc(50% - 6px) !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+      }
+
+      #btn-export-excel {
+        flex: 1 1 100% !important;
+      }
+
+      #btn-print {
+        display: none !important;
+      }
+
+      #theme-toggle {
+        flex: 0 0 38px !important;
+        height: 34px !important;
+        padding: 0 !important;
+      }
+
+      /* KPI Cards */
+      .kpi-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+        margin-bottom: 14px !important;
+      }
+
+      .kpi-card {
+        padding: 10px 14px !important;
+        border-radius: var(--radius-sm) !important;
+      }
+
+      .kpi-info h4 {
+        font-size: 0.78rem !important;
+      }
+
+      .kpi-info .kpi-value {
+        font-size: 1.35rem !important;
+      }
+
+      .kpi-info .kpi-sub {
+        font-size: 0.68rem !important;
+      }
+
+      .kpi-icon-bubble {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 16px !important;
+      }
+
+      /* Filters Hub */
+      .filter-card {
+        padding: 12px !important;
+        margin-bottom: 14px !important;
+        border-radius: var(--radius-md) !important;
       }
 
       .filter-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+
+      .form-control {
+        font-size: 16px !important; /* Prevents auto-zoom on iOS */
+        padding: 8px 10px !important;
+      }
+
+      .month-pills {
+        gap: 4px !important;
+        margin-top: 10px !important;
+        padding-top: 10px !important;
+      }
+
+      .pill-btn {
+        padding: 4px 8px !important;
+        font-size: 0.72rem !important;
+      }
+
+      .employee-pills {
+        gap: 6px !important;
+        margin-top: 8px !important;
+      }
+
+      .emp-pill {
+        padding: 4px 10px !important;
+        font-size: 0.75rem !important;
+      }
+
+      .status-filters {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 5px !important;
+        margin-top: 8px !important;
+      }
+
+      .status-btn {
+        padding: 6px 8px !important;
+        font-size: 0.74rem !important;
+        justify-content: center !important;
+        width: 100% !important;
+      }
+
+      /* View Switcher Tabs */
+      .view-tabs-container {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        margin-bottom: 12px !important;
+      }
+
+      .view-tabs {
+        display: flex !important;
+        width: 100% !important;
+        padding: 3px !important;
+        gap: 2px !important;
+        border-radius: var(--radius-sm) !important;
+      }
+
+      .view-tab {
+        flex: 1 !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 7px 4px !important;
+        font-size: 0.78rem !important;
+        gap: 4px !important;
+      }
+
+      .tab-text-full {
+        display: none !important;
+      }
+
+      .tab-text-short {
+        display: inline !important;
+      }
+
+      .view-meta {
+        text-align: center !important;
+        font-size: 0.72rem !important;
+      }
+
+      /* View 1: Summary Cards */
+      .emp-summary-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        margin-bottom: 16px !important;
+      }
+
+      .emp-card {
+        padding: 12px 14px !important;
+        border-radius: var(--radius-md) !important;
+      }
+
+      .emp-card-header {
+        gap: 10px !important;
+        margin-bottom: 10px !important;
+        padding-bottom: 10px !important;
+      }
+
+      .emp-avatar {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 1rem !important;
+      }
+
+      .emp-title h3 {
+        font-size: 0.95rem !important;
+      }
+
+      .emp-stats-list {
+        gap: 6px !important;
+        margin-bottom: 10px !important;
+      }
+
+      .emp-stat-box {
+        padding: 8px 10px !important;
+      }
+
+      .emp-stat-box .stat-label {
+        font-size: 0.68rem !important;
+      }
+
+      .emp-stat-box .stat-num {
+        font-size: 1.05rem !important;
+      }
+
+      /* View 2: Mobile Card-Based Table (ไม่ตกขอบ ไม่ต้องเลื่อนด้านข้าง) */
+      .table-card {
+        border-radius: var(--radius-md) !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      .table-responsive {
+        overflow-x: visible !important;
+      }
+
+      table.attendance-table thead {
+        display: none !important;
+      }
+
+      table.attendance-table,
+      table.attendance-table tbody,
+      table.attendance-table tr {
+        display: block !important;
+        width: 100% !important;
+      }
+
+      table.attendance-table tbody tr {
+        background: var(--bg-card) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: var(--radius-md) !important;
+        padding: 12px 14px !important;
+        margin-bottom: 10px !important;
+        box-shadow: var(--shadow-sm) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+      }
+
+      table.attendance-table tbody tr td {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 5px 0 !important;
+        border-bottom: 1px dashed var(--border-color) !important;
+        font-size: 0.82rem !important;
+        background: transparent !important;
+      }
+
+      table.attendance-table tbody tr td:last-child {
+        border-bottom: none !important;
+        padding-top: 8px !important;
+      }
+
+      .mobile-td-label {
+        display: inline-block !important;
+        font-size: 0.74rem !important;
+        color: var(--text-muted) !important;
+        font-weight: 500 !important;
+        flex-shrink: 0 !important;
+      }
+
+      .td-val {
+        display: inline-flex !important;
+        align-items: center !important;
+        text-align: right !important;
+        word-break: break-word !important;
+      }
+
+      table.attendance-table td.td-punches .all-punches-popover {
+        max-width: 100% !important;
+        justify-content: flex-end !important;
+      }
+
+      /* Table Pagination */
+      .table-footer {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        padding: 12px !important;
+        background: var(--bg-card) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: var(--radius-md) !important;
+        margin-top: 10px !important;
+      }
+
+      .table-footer > div:first-child {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        font-size: 0.78rem !important;
+      }
+
+      .pagination-controls {
+        display: flex !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        gap: 8px !important;
+      }
+
+      .pagination-controls .btn {
+        flex: 1 !important;
+        justify-content: center !important;
+        padding: 7px 10px !important;
+        font-size: 0.8rem !important;
+      }
+
+      /* View 3: Calendar View */
+      .calendar-container {
+        padding: 10px 6px !important;
+        border-radius: var(--radius-md) !important;
+        overflow-x: hidden !important;
+      }
+
+      .calendar-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        margin-bottom: 10px !important;
+      }
+
+      .cal-title h3 {
+        font-size: 0.92rem !important;
+      }
+
+      .calendar-legend {
+        gap: 6px 10px !important;
+        font-size: 0.68rem !important;
+      }
+
+      .calendar-grid {
+        gap: 2px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .calendar-day-header {
+        padding: 5px 1px !important;
+        font-size: 0.68rem !important;
+      }
+
+      .calendar-day-cell {
+        min-height: 48px !important;
+        padding: 3px 2px !important;
+        border-radius: 3px !important;
+      }
+
+      .cell-date-num {
+        font-size: 0.7rem !important;
+      }
+
+      .cell-badge {
+        font-size: 0.52rem !important;
+        padding: 1px 2px !important;
+        max-width: 28px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+      }
+
+      .cell-time-line {
+        font-size: 0.58rem !important;
+        justify-content: center !important;
+      }
+
+      .cell-time-line span {
+        display: none !important;
+      }
+
+      .cell-time-line strong {
+        font-size: 0.62rem !important;
+      }
+
+      .cell-body-empty {
+        font-size: 0.55rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        text-align: center !important;
+      }
+
+      /* Modals */
+      .modal-backdrop {
+        padding: 8px !important;
+      }
+
+      .modal-box {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 94vh !important;
+        border-radius: var(--radius-md) !important;
+      }
+
+      .modal-header {
+        padding: 12px 14px !important;
+      }
+
+      .modal-header h3 {
+        font-size: 0.92rem !important;
+      }
+
+      .modal-body {
+        padding: 12px 14px !important;
+        gap: 12px !important;
+      }
+
+      .modal-footer {
+        padding: 12px 14px !important;
+        flex-direction: column-reverse !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+      }
+
+      .modal-footer .btn {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 9px !important;
+        font-size: 0.88rem !important;
+      }
+
+      .modal-subtabs {
+        display: flex !important;
+        gap: 6px !important;
+        width: 100% !important;
+      }
+
+      .modal-subtab-btn {
+        flex: 1 !important;
+        text-align: center !important;
+        justify-content: center !important;
+        padding: 7px 4px !important;
+        font-size: 0.72rem !important;
+      }
+
+      .emp-dayoff-body {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        padding: 8px 10px !important;
+      }
+
+      .dow-group {
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        width: 100% !important;
+        gap: 3px !important;
+      }
+
+      .dow-btn {
+        width: 100% !important;
+        height: 34px !important;
+        font-size: 0.75rem !important;
+        border-radius: 6px !important;
+      }
+
+      .gym-holiday-form {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        padding: 10px !important;
+      }
+
+      .gym-holiday-form > div {
+        min-width: 0 !important;
+        width: 100% !important;
+        flex: none !important;
+      }
+
+      .gym-holiday-form .btn {
+        width: 100% !important;
+        justify-content: center !important;
+      }
+
+      .btn-leave-choice {
+        padding: 8px 4px !important;
+        font-size: 0.72rem !important;
+      }
+
+      /* Toasts */
+      .toast-container {
+        left: 10px !important;
+        right: 10px !important;
+        bottom: 12px !important;
+        width: auto !important;
+      }
+
+      .toast {
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 10px 14px !important;
+        font-size: 0.8rem !important;
       }
     }
   </style>
@@ -1644,9 +2165,9 @@
         </button>
 
         <!-- Holiday Settings Trigger -->
-        <button class="btn" id="btn-open-holidays" title="ตั้งค่าวันหยุดเพื่อกรองการลา">
+        <button class="btn" id="btn-open-holidays" title="ตั้งค่าวันหยุดประจำตัวและวันหยุดยิม">
           <span>🏖️ จัดการวันหยุด & ตรวจสอบการลา</span>
-          <span class="badge badge-holiday" id="header-holiday-count" style="font-size:0.7rem;">22 วัน</span>
+          <span class="badge badge-holiday" id="header-holiday-count" style="font-size:0.7rem; display:none;">0 วัน</span>
         </button>
 
         <!-- Export Cleaned Excel File -->
@@ -1717,16 +2238,6 @@
           <div class="kpi-sub">วันทำงานแต่ไม่มีสแกน</div>
         </div>
         <div class="kpi-icon-bubble bubble-red">📝</div>
-      </div>
-
-      <!-- Holidays / Day-offs -->
-      <div class="kpi-card" id="kpi-holidays" title="คลิกเพื่อกรองวันหยุด">
-        <div class="kpi-info">
-          <h4>วันหยุด / สุดสัปดาห์</h4>
-          <div class="kpi-value" id="kpi-val-holiday">0 วัน</div>
-          <div class="kpi-sub">ตรงกับวันหยุดที่กำหนด</div>
-        </div>
-        <div class="kpi-icon-bubble bubble-blue">🏖️</div>
       </div>
     </div>
 
@@ -1836,9 +2347,6 @@
         <button class="status-btn" data-status="business">
           📋 ลากิจ
         </button>
-        <button class="status-btn" data-status="holiday">
-          🏖️ วันหยุด & สุดสัปดาห์
-        </button>
       </div>
     </section>
 
@@ -1846,13 +2354,16 @@
     <div class="view-tabs-container">
       <div class="view-tabs">
         <button class="view-tab active" data-view="summary">
-          📊 สรุปภาพรวมรายบุคคล
+          <span class="tab-text-full">📊 สรุปภาพรวมรายบุคคล</span>
+          <span class="tab-text-short">📊 ภาพรวม</span>
         </button>
         <button class="view-tab" data-view="table">
-          📋 รายการลงเวลารายวัน (ตาราง)
+          <span class="tab-text-full">📋 รายการลงเวลารายวัน (ตาราง)</span>
+          <span class="tab-text-short">📋 รายวัน</span>
         </button>
         <button class="view-tab" data-view="calendar">
-          📅 ปฏิทินลงเวลารายบุคคล
+          <span class="tab-text-full">📅 ปฏิทินลงเวลารายบุคคล</span>
+          <span class="tab-text-short">📅 ปฏิทิน</span>
         </button>
       </div>
 
@@ -2083,7 +2594,7 @@
   <div class="modal-backdrop" id="holiday-modal">
     <div class="modal-box modal-lg">
       <div class="modal-header">
-        <h3>🏖️ จัดการวันหยุด & ตรวจสอบการลา (Gym & Staff Day-Offs Manager)</h3>
+        <h3>🏖️ จัดการวันหยุดประจำสัปดาห์ & วันหยุดยิม (Staff Day-Offs & Gym Closures)</h3>
         <button class="btn btn-icon-only" id="btn-close-modal" style="border:none; font-size:1.2rem;">✕</button>
       </div>
 
@@ -2094,10 +2605,7 @@
             👤 1. วันหยุดประจำสัปดาห์รายบุคคล
           </button>
           <button type="button" class="modal-subtab-btn" data-tab="tab-gym-holidays" id="tab-btn-gym">
-            🏋️ 2. วันหยุดประจำยิม (ใส่เอง) <span class="badge badge-holiday" id="modal-gym-count" style="font-size:0.7rem;">0 วัน</span>
-          </button>
-          <button type="button" class="modal-subtab-btn" data-tab="tab-official-holidays" id="tab-btn-official">
-            🇹🇭 3. วันหยุดนักขัตฤกษ์ทั่วไป (<span id="modal-holiday-total">0</span> วัน)
+            🏋️ 2. วันหยุดประจำยิม / วันปิดทำการพิเศษ <span class="badge badge-holiday" id="modal-gym-count" style="font-size:0.7rem;">0 วัน</span>
           </button>
         </div>
 
@@ -2120,7 +2628,7 @@
           </div>
 
           <!-- Add Gym Holiday Form -->
-          <div style="background:var(--bg-card-alt); padding:14px; border-radius:var(--radius-sm); display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+          <div class="gym-holiday-form" style="background:var(--bg-card-alt); padding:14px; border-radius:var(--radius-sm); display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
             <div style="flex:1; min-width:140px;">
               <label style="font-size:0.78rem; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">วันที่ยิมหยุด</label>
               <input type="date" id="input-gym-holiday-date" class="form-control">
@@ -2142,51 +2650,6 @@
               </span>
             </div>
             <div id="gym-holidays-list-container" style="max-height:260px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
-              <!-- Populated dynamically -->
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 3: Official Holidays & Custom Holidays -->
-        <div class="modal-subtab-panel" id="tab-official-holidays">
-          <!-- Add Custom Holiday Form -->
-          <div style="background:var(--bg-card-alt); padding:14px; border-radius:var(--radius-sm); border:1px solid var(--border-color);">
-            <label style="font-size:0.85rem; font-weight:600; color:var(--text-main); display:block; margin-bottom:8px;">
-              ➕ เพิ่มวันหยุดนักขัตฤกษ์ / ประเพณีเพิ่มเติม (บันทึกถาวร)
-            </label>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <input type="date" id="input-new-holiday-date" class="form-control" style="width:160px;">
-              <input type="text" id="input-new-holiday-name" class="form-control" style="flex:1; min-width:160px;"
-                placeholder="ชื่อวันหยุด เช่น วันหยุดประเพณี, วันหยุดพิเศษ...">
-              <button type="button" class="btn btn-primary" id="btn-add-holiday" style="padding:6px 16px;">+ เพิ่ม</button>
-            </div>
-          </div>
-
-          <!-- Section: Custom Added Holidays -->
-          <div style="margin-top:14px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <label style="font-size:0.85rem; font-weight:600; color:var(--text-main); display:flex; align-items:center; gap:6px;">
-                <span>🎉</span>
-                <span>วันหยุดประเพณี / วันหยุดเพิ่มเติมที่เพิ่มเอง (<span id="modal-custom-holiday-count">0</span> วัน)</span>
-              </label>
-            </div>
-            <div id="modal-custom-holidays-list" style="display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto;">
-              <!-- Populated dynamically -->
-            </div>
-          </div>
-
-          <!-- Section: Official Thai Holidays -->
-          <div style="margin-top:14px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <label style="font-size:0.85rem; font-weight:600; color:var(--text-main); display:flex; align-items:center; gap:6px;">
-                <span>🇹🇭</span>
-                <span>รายการวันหยุดนักขัตฤกษ์ทางการไทย (<span id="modal-official-default-count">0</span> วัน)</span>
-              </label>
-              <button type="button" class="btn" id="btn-reset-default-holidays" style="padding:2px 8px; font-size:0.75rem;">
-                รีเซ็ตค่าเริ่มต้น
-              </button>
-            </div>
-            <div class="holiday-list" id="modal-holidays-list" style="max-height:220px; overflow-y:auto;">
               <!-- Populated dynamically -->
             </div>
           </div>
@@ -2241,9 +2704,6 @@
       const DB_KEYS = {
         DAYOFFS: 'att_employee_dayoffs',
         GYM_HOLIDAYS: 'att_gym_holidays',
-        CUSTOM_HOLIDAYS: 'att_custom_official_holidays',
-        DELETED_OFFICIAL_HOLIDAYS: 'att_deleted_official_holidays',
-        DISABLED_OFFICIAL_HOLIDAYS: 'att_disabled_official_holidays',
         SAVED_FILTERS: 'att_saved_filters',
         LEAVE_REASONS: 'att_leave_reasons'
       };
@@ -2317,83 +2777,6 @@
         } catch (e) {}
       }
 
-      // Load persistent Custom Official Holidays from LocalStorage
-      function loadCustomOfficialHolidays() {
-        try {
-          const raw = localStorage.getItem(DB_KEYS.CUSTOM_HOLIDAYS);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) return parsed;
-          }
-          // Migration from previous legacy storage key if present
-          const legacyRaw = localStorage.getItem('att_official_holidays');
-          if (legacyRaw) {
-            const legacyParsed = JSON.parse(legacyRaw);
-            if (Array.isArray(legacyParsed)) {
-              const defaultMap = new Map((window.ATTENDANCE_DATA.holidays || []).map(h => [h.date, h.name]));
-              const customItems = legacyParsed.filter(h => !defaultMap.has(h.date));
-              if (customItems.length > 0) {
-                return customItems.map(c => ({
-                  id: c.id || ('ch_' + Math.random().toString(36).substr(2, 9)),
-                  date: c.date,
-                  name: c.name,
-                  disabled: Boolean(c.disabled)
-                }));
-              }
-            }
-          }
-        } catch (e) {
-          console.error("Failed to load custom official holidays", e);
-        }
-        return [];
-      }
-
-      function saveCustomOfficialHolidaysToDB() {
-        try {
-          localStorage.setItem(DB_KEYS.CUSTOM_HOLIDAYS, JSON.stringify(state.customOfficialHolidays));
-        } catch (e) {}
-      }
-
-      // Load persistent Deleted Official Holidays from LocalStorage
-      function loadDeletedOfficialHolidays() {
-        try {
-          const raw = localStorage.getItem(DB_KEYS.DELETED_OFFICIAL_HOLIDAYS);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) return new Set(parsed);
-          }
-        } catch (e) {
-          console.error("Failed to load deleted official holidays", e);
-        }
-        return new Set();
-      }
-
-      function saveDeletedOfficialHolidaysToDB() {
-        try {
-          localStorage.setItem(DB_KEYS.DELETED_OFFICIAL_HOLIDAYS, JSON.stringify(Array.from(state.deletedOfficialHolidays)));
-        } catch (e) {}
-      }
-
-      // Load persistent Disabled Official Holidays from LocalStorage
-      function loadDisabledOfficialHolidays() {
-        try {
-          const raw = localStorage.getItem(DB_KEYS.DISABLED_OFFICIAL_HOLIDAYS);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) return new Set(parsed);
-          }
-        } catch (e) {
-          console.error("Failed to load disabled official holidays", e);
-        }
-        return new Set();
-      }
-
-      function saveDisabledOfficialHolidaysToDB() {
-        try {
-          localStorage.setItem(DB_KEYS.DISABLED_OFFICIAL_HOLIDAYS, JSON.stringify(Array.from(state.disabledOfficialHolidays)));
-        } catch (e) {}
-      }
-
       // Load persistent Filters
       function loadSavedFilters() {
         try {
@@ -2429,9 +2812,6 @@
         // Persistent database configurations
         employeeDayOffs: loadEmployeeDayOffs(),
         gymHolidays: loadGymHolidays(),
-        customOfficialHolidays: loadCustomOfficialHolidays(),
-        deletedOfficialHolidays: loadDeletedOfficialHolidays(),
-        disabledOfficialHolidays: loadDisabledOfficialHolidays(),
         leaveReasons: loadLeaveReasons(),
 
         // Filters (Restored from LocalStorage so filters stay preserved)
@@ -2639,40 +3019,26 @@
         });
       }
 
-      // Holiday Maps for fast O(1) lookup
-      let officialHolidayMap = new Map();
+      // Gym Holiday Map for fast O(1) lookup
       let gymHolidayMap = new Map();
 
       function rebuildHolidayMaps() {
-        officialHolidayMap.clear();
-
-        // 1. Official Thai default holidays (from data.js)
-        const defaultHolidays = window.ATTENDANCE_DATA.holidays || [];
-        defaultHolidays.forEach(h => {
-          const key = h.date + '_' + h.name;
-          if (!state.deletedOfficialHolidays.has(key) && !state.disabledOfficialHolidays.has(key)) {
-            officialHolidayMap.set(h.date, h.name);
-          }
-        });
-
-        // 2. Custom official / traditional holidays added by user
-        state.customOfficialHolidays.forEach(ch => {
-          if (!ch.disabled && ch.date) {
-            officialHolidayMap.set(ch.date, ch.name || 'วันหยุดประเพณี/พิเศษ');
-          }
-        });
-
-        // 3. Gym Holidays
+        // Gym Holidays (วันหยุดประจำยิม / วันปิดทำการพิเศษ)
         gymHolidayMap.clear();
-        state.gymHolidays.forEach(gh => {
+        (state.gymHolidays || []).forEach(gh => {
           if (gh.enabled !== false && gh.date) {
             gymHolidayMap.set(gh.date, gh.name || 'วันหยุดประจำยิม');
           }
         });
 
-        const totalHolidays = officialHolidayMap.size + gymHolidayMap.size;
-        dom.headerHolidayCount.textContent = `${totalHolidays} วัน`;
-        if (dom.modalHolidayTotal) dom.modalHolidayTotal.textContent = officialHolidayMap.size;
+        if (dom.headerHolidayCount) {
+          if (gymHolidayMap.size > 0) {
+            dom.headerHolidayCount.textContent = `${gymHolidayMap.size} วัน`;
+            dom.headerHolidayCount.style.display = 'inline-flex';
+          } else {
+            dom.headerHolidayCount.style.display = 'none';
+          }
+        }
         if (dom.modalGymCount) dom.modalGymCount.textContent = `${gymHolidayMap.size} วัน`;
         if (dom.gymHolidayCountDisplay) dom.gymHolidayCountDisplay.textContent = gymHolidayMap.size;
       }
@@ -2694,18 +3060,14 @@
         const isPersonalDayOff = empDayOffs.includes(dayOfWeek);
         const dayName = thaiDays[dayOfWeek] || '';
 
-        // 2. Gym Holiday (วันหยุดประจำยิม)
+        // 2. Gym Holiday (วันหยุดประจำยิม / วันปิดทำการพิเศษ)
         const gymHolidayName = gymHolidayMap.get(isoDate);
 
-        // 3. Official Thai Holiday
-        const officialHolidayName = officialHolidayMap.get(isoDate);
-
-        const isAnyHoliday = isPersonalDayOff || Boolean(gymHolidayName) || Boolean(officialHolidayName);
+        // Note: Official Thai Holidays removed completely per requirement
+        const isAnyHoliday = isPersonalDayOff || Boolean(gymHolidayName);
         let holidayDisplayName = '';
         if (gymHolidayName) {
           holidayDisplayName = `🏋️ ${gymHolidayName} (วันหยุดยิม)`;
-        } else if (officialHolidayName) {
-          holidayDisplayName = `🇹🇭 ${officialHolidayName}`;
         } else if (isPersonalDayOff) {
           holidayDisplayName = `🏖️ วันหยุดประจำตัว (วัน${dayName})`;
         }
@@ -2883,7 +3245,7 @@
         dom.kpiValPresent.textContent = `${countNormal.toLocaleString()} วัน`;
         dom.kpiValSingle.textContent = `${countSingle.toLocaleString()} วัน`;
         dom.kpiValLeave.textContent = `${countLeave.toLocaleString()} วัน`;
-        dom.kpiValHoliday.textContent = `${countHoliday.toLocaleString()} วัน`;
+        if (dom.kpiValHoliday) dom.kpiValHoliday.textContent = `${countHoliday.toLocaleString()} วัน`;
 
         const kpiLeaveSub = dom.kpiLeave?.querySelector('.kpi-sub');
         if (kpiLeaveSub) {
@@ -3010,7 +3372,7 @@
 
             <div class="emp-card-footer">
               <span style="font-size:0.75rem; color:var(--text-light);">
-                วันหยุด/สุดสัปดาห์: ${g.holidayDays} วัน
+                วันหยุดประจำตัว/ยิม: ${g.holidayDays} วัน
               </span>
               <button class="emp-quick-action" data-emp="${emp.id}">
                 ดูรายการลงเวลา ▶
@@ -3091,29 +3453,45 @@
 
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td style="font-family:'Inter', sans-serif; font-weight:600;">${r.date}</td>
-            <td style="color:${isWeekend ? 'var(--holiday)' : 'var(--text-muted)'};">
-              วัน${dayName}
-            </td>
-            <td style="font-family:'Inter', monospace; color:var(--text-muted);">${r.empId}</td>
-            <td style="font-weight:600;">${r.empName}</td>
             <td>
-              ${r.checkIn ? `<span class="punch-time-badge in">${r.checkIn}</span>` : '<span style="color:var(--text-light);">-</span>'}
+              <span class="mobile-td-label">วันที่</span>
+              <span class="td-val" style="font-family:'Inter', sans-serif; font-weight:600;">${r.date}</span>
             </td>
             <td>
-              ${r.checkOut ? `<span class="punch-time-badge out">${r.checkOut}</span>` : '<span style="color:var(--text-light);">-</span>'}
-            </td>
-            <td style="font-family:'Inter'; font-size:0.8rem; color:var(--text-muted);">
-              ${r.workHoursFormatted || '-'}
+              <span class="mobile-td-label">วัน</span>
+              <span class="td-val" style="color:${isWeekend ? 'var(--holiday)' : 'var(--text-muted)'};">วัน${dayName}</span>
             </td>
             <td>
-              <div class="all-punches-popover">${punchesHtml}</div>
+              <span class="mobile-td-label">รหัส</span>
+              <span class="td-val" style="font-family:'Inter', monospace; color:var(--text-muted);">${r.empId}</span>
             </td>
-            <td style="text-align:center; font-weight:600; font-family:'Inter';">${r.count}</td>
             <td>
-              <span class="badge ${evalRes.badgeClass}">
-                ${evalRes.label}
-              </span>
+              <span class="mobile-td-label">ชื่อ-สกุล</span>
+              <span class="td-val" style="font-weight:600;">${r.empName}</span>
+            </td>
+            <td>
+              <span class="mobile-td-label">เวลาเข้า</span>
+              <span class="td-val">${r.checkIn ? `<span class="punch-time-badge in">${r.checkIn}</span>` : '<span style="color:var(--text-light);">-</span>'}</span>
+            </td>
+            <td>
+              <span class="mobile-td-label">เวลาออก</span>
+              <span class="td-val">${r.checkOut ? `<span class="punch-time-badge out">${r.checkOut}</span>` : '<span style="color:var(--text-light);">-</span>'}</span>
+            </td>
+            <td>
+              <span class="mobile-td-label">ชั่วโมงงาน</span>
+              <span class="td-val" style="font-family:'Inter'; font-size:0.8rem; color:var(--text-muted);">${r.workHoursFormatted || '-'}</span>
+            </td>
+            <td class="td-punches">
+              <span class="mobile-td-label">บันทึกทั้งหมด</span>
+              <span class="td-val"><div class="all-punches-popover">${punchesHtml}</div></span>
+            </td>
+            <td>
+              <span class="mobile-td-label">ครั้ง</span>
+              <span class="td-val" style="font-weight:600; font-family:'Inter';">${r.count}</span>
+            </td>
+            <td>
+              <span class="mobile-td-label">สถานะ</span>
+              <span class="td-val"><span class="badge ${evalRes.badgeClass}">${evalRes.label}</span></span>
             </td>
           `;
 
@@ -3127,7 +3505,7 @@
         if (pageItems.length === 0) {
           dom.tableBody.innerHTML = `
             <tr>
-              <td colspan="10" style="text-align:center; padding:40px; color:var(--text-muted);">
+              <td colspan="10" style="text-align:center; padding:40px; color:var(--text-muted); justify-content:center !important; display:block !important; width:100%;">
                 ไม่พบข้อมูลรายการที่ตรงกับเงื่อนไข
               </td>
             </tr>
@@ -3252,7 +3630,7 @@
             <div class="cell-body">
               ${rec.checkIn ? `<div class="cell-time-line"><span>เข้า:</span> <strong>${rec.checkIn}</strong></div>` : ''}
               ${rec.checkOut ? `<div class="cell-time-line"><span>ออก:</span> <strong>${rec.checkOut}</strong></div>` : ''}
-              ${!rec.checkIn && !rec.checkOut ? `<div style="color:var(--text-light); font-size:0.7rem; line-height:1.2;">${evalRes.label || evalRes.holidayName || 'ไม่มีการสแกน'}</div>` : ''}
+              ${!rec.checkIn && !rec.checkOut ? `<div class="cell-body-empty" style="color:var(--text-light); font-size:0.7rem; line-height:1.2;">${evalRes.label || evalRes.holidayName || 'ไม่มีการสแกน'}</div>` : ''}
             </div>
           `;
 
@@ -3740,12 +4118,14 @@
         switchView('table');
       });
 
-      dom.kpiHolidays.addEventListener('click', () => {
-        state.filterStatus = 'holiday';
-        saveFilterState();
-        updateStatusPillsUI();
-        switchView('table');
-      });
+      if (dom.kpiHolidays) {
+        dom.kpiHolidays.addEventListener('click', () => {
+          state.filterStatus = 'holiday';
+          saveFilterState();
+          updateStatusPillsUI();
+          switchView('table');
+        });
+      }
 
       // Pagination Handlers
       dom.btnPrevPage.addEventListener('click', () => {
@@ -3970,133 +4350,10 @@
         rebuildHolidayMaps();
       }
 
-      function renderCustomHolidaysList() {
-        const container = document.getElementById('modal-custom-holidays-list');
-        const countEl = document.getElementById('modal-custom-holiday-count');
-        if (!container) return;
-        container.innerHTML = '';
-
-        if (!state.customOfficialHolidays || state.customOfficialHolidays.length === 0) {
-          container.innerHTML = `
-            <div style="text-align:center; padding:12px; color:var(--text-muted); font-size:0.8rem; background:var(--bg-card); border-radius:var(--radius-sm); border:1px dashed var(--border-color);">
-              ยังไม่มีการเพิ่มวันหยุดประเพณี/เพิ่มเติม (สามารถระบุวันที่และชื่อวันหยุดด้านบนเพื่อเพิ่มได้)
-            </div>
-          `;
-          if (countEl) countEl.textContent = '0';
-          return;
-        }
-
-        if (countEl) countEl.textContent = state.customOfficialHolidays.length;
-
-        state.customOfficialHolidays.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
-
-        state.customOfficialHolidays.forEach((ch) => {
-          const item = document.createElement('div');
-          item.className = 'holiday-item';
-          item.style.display = 'flex';
-          item.style.alignItems = 'center';
-          item.style.justifyContent = 'space-between';
-          item.style.padding = '8px 12px';
-          item.style.background = 'var(--bg-card)';
-          item.style.borderRadius = 'var(--radius-sm)';
-          item.style.border = '1px solid var(--border-color)';
-
-          const dParts = (ch.date || '').split('-');
-          const dateTh = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}/${dParts[0]}` : ch.date;
-
-          item.innerHTML = `
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span style="font-size:1rem;">🎉</span>
-              <strong style="font-family:'Inter'; font-size:0.88rem; color:var(--text-main);">${dateTh}</strong>
-              <span style="font-size:0.85rem; color:var(--text-muted); margin-left:4px;">- ${ch.name || 'วันหยุดเพิ่มเติม'}</span>
-              <span class="badge badge-holiday" style="font-size:0.68rem; margin-left:6px;">เพิ่มเอง</span>
-            </div>
-            <button type="button" class="btn btn-icon-only" style="border:none; color:var(--danger); cursor:pointer; font-size:1rem;" title="ลบวันหยุดนี้ถาวร">
-              🗑️
-            </button>
-          `;
-
-          item.querySelector('button').addEventListener('click', () => {
-            if (confirm(`คุณต้องการลบวันหยุด "${ch.name}" (${dateTh}) หรือไม่? (จะถูกลบออกจากฐานข้อมูลถาวร และเปิดเว็บใหม่จะไม่แสดงอีก)`)) {
-              state.customOfficialHolidays = state.customOfficialHolidays.filter(x => x.id !== ch.id);
-              saveCustomOfficialHolidaysToDB();
-              renderCustomHolidaysList();
-              rebuildHolidayMaps();
-              renderAll();
-              showToast(`🗑️ ลบวันหยุด "${ch.name}" เรียบร้อย จะไม่แสดงขึ้นมาอีก`, 'success');
-            }
-          });
-
-          container.appendChild(item);
-        });
-      }
-
-      function renderHolidaysModalList() {
-        if (!dom.modalHolidaysList) return;
-        dom.modalHolidaysList.innerHTML = '';
-
-        const defaultList = (window.ATTENDANCE_DATA.holidays || []).filter(h => {
-          const key = h.date + '_' + h.name;
-          return !state.deletedOfficialHolidays.has(key);
-        });
-
-        const countEl = document.getElementById('modal-official-default-count');
-        if (countEl) countEl.textContent = defaultList.length;
-
-        defaultList.forEach((h) => {
-          const key = h.date + '_' + h.name;
-          const isDisabled = state.disabledOfficialHolidays.has(key);
-
-          const item = document.createElement('div');
-          item.className = 'holiday-item ' + (isDisabled ? 'inactive' : '');
-
-          const dParts = (h.date || '').split('-');
-          const dateTh = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}/${dParts[0]}` : h.date;
-
-          item.innerHTML = `
-            <div style="display:flex; align-items:center; gap:8px;">
-              <input type="checkbox" ${isDisabled ? '' : 'checked'} style="cursor:pointer; width:16px; height:16px;">
-              <span style="font-family:'Inter'; font-weight:600; font-size:0.88rem;">${dateTh}</span>
-              <span style="font-size:0.85rem;">- ${h.name}</span>
-            </div>
-            <button type="button" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.8rem;" title="ลบวันหยุดนี้ถาวร">
-              ลบ
-            </button>
-          `;
-
-          item.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
-            if (e.target.checked) {
-              state.disabledOfficialHolidays.delete(key);
-            } else {
-              state.disabledOfficialHolidays.add(key);
-            }
-            saveDisabledOfficialHolidaysToDB();
-            renderHolidaysModalList();
-            rebuildHolidayMaps();
-            renderAll();
-          });
-
-          item.querySelector('button').addEventListener('click', () => {
-            if (confirm(`คุณต้องการลบวันหยุด "${h.name}" (${dateTh}) ออกจากระบบหรือไม่? (เมื่อลบแล้วจะไม่แสดงขึ้นมาอีก)`)) {
-              state.deletedOfficialHolidays.add(key);
-              saveDeletedOfficialHolidaysToDB();
-              renderHolidaysModalList();
-              rebuildHolidayMaps();
-              renderAll();
-              showToast(`🗑️ ลบวันหยุด "${h.name}" เรียบร้อย จะไม่แสดงขึ้นมาอีก`, 'success');
-            }
-          });
-
-          dom.modalHolidaysList.appendChild(item);
-        });
-      }
-
       // Open Modal Handler
       dom.btnOpenHolidays.addEventListener('click', () => {
         renderStaffDayOffsUI();
         renderGymHolidaysListUI();
-        renderCustomHolidaysList();
-        renderHolidaysModalList();
         dom.holidayModal.classList.add('open');
       });
 
@@ -4141,52 +4398,6 @@
         });
       }
 
-      // Add Custom Official Holiday
-      dom.btnAddHoliday.addEventListener('click', () => {
-        const d = dom.inputNewHolidayDate.value;
-        const n = dom.inputNewHolidayName.value.trim();
-        if (!d) {
-          alert('กรุณาเลือกวันที่');
-          return;
-        }
-        if (!n) {
-          alert('กรุณาระบุชื่อวันหยุด');
-          return;
-        }
-
-        const newCustom = {
-          id: 'ch_' + Date.now(),
-          date: d,
-          name: n,
-          disabled: false
-        };
-
-        state.customOfficialHolidays.push(newCustom);
-        saveCustomOfficialHolidaysToDB();
-
-        dom.inputNewHolidayDate.value = '';
-        dom.inputNewHolidayName.value = '';
-
-        renderCustomHolidaysList();
-        rebuildHolidayMaps();
-        renderAll();
-        showToast(`✅ เพิ่มวันหยุด "${n}" บันทึกลงฐานข้อมูลเรียบร้อย`, 'success');
-      });
-
-      // Reset default official holidays
-      dom.btnResetDefaultHolidays.addEventListener('click', () => {
-        if (confirm('คุณต้องการรีเซ็ตวันหยุดนักขัตฤกษ์ทางการไทยกลับเป็นค่าเริ่มต้นเดิมหรือไม่? (วันหยุดประเพณีที่คุณเพิ่มเองจะยังคงอยู่)')) {
-          state.deletedOfficialHolidays.clear();
-          state.disabledOfficialHolidays.clear();
-          saveDeletedOfficialHolidaysToDB();
-          saveDisabledOfficialHolidaysToDB();
-          renderHolidaysModalList();
-          rebuildHolidayMaps();
-          renderAll();
-          showToast('🔄 รีเซ็ตวันหยุดนักขัตฤกษ์ทางการไทยเรียบร้อย', 'success');
-        }
-      });
-
       // Sub-tab Navigation
       document.querySelectorAll('.modal-subtab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -4202,13 +4413,10 @@
       dom.btnSaveHolidays.addEventListener('click', () => {
         saveEmployeeDayOffsToDB();
         saveGymHolidaysToDB();
-        saveCustomOfficialHolidaysToDB();
-        saveDeletedOfficialHolidaysToDB();
-        saveDisabledOfficialHolidaysToDB();
         rebuildHolidayMaps();
         dom.holidayModal.classList.remove('open');
         renderAll();
-        showToast('💾 บันทึกวันหยุดประจำสัปดาห์รายคน, วันหยุดยิม และวันหยุดนักขัตฤกษ์ลงฐานข้อมูลเรียบร้อย', 'success');
+        showToast('💾 บันทึกวันหยุดประจำสัปดาห์รายคน และวันหยุดประจำยิมเรียบร้อย', 'success');
       });
 
       // Export Cleaned Excel File
