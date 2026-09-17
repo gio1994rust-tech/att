@@ -2175,6 +2175,11 @@
           ส่งออก Excel สะอาด
         </button>
 
+        <!-- Reset to default data button (แสดงเมื่อมีข้อมูลนำเข้า) -->
+        <button class="btn" id="btn-reset-default-data" title="กลับไปใช้ข้อมูลเริ่มต้นเดิม" style="display:none;">
+          🔄 ข้อมูลเริ่มต้น
+        </button>
+
         <!-- Print View -->
         <button class="btn" id="btn-print" title="พิมพ์รายงาน">
           🖨️ พิมพ์
@@ -2791,9 +2796,9 @@
         gymHolidays: loadGymHolidays(),
         leaveReasons: loadLeaveReasons(),
 
-        // Filters (Restored from LocalStorage so filters stay preserved)
+        // Filters (Restored from LocalStorage; defaults to current year)
         filterEmployee: savedFilters?.filterEmployee !== undefined ? savedFilters.filterEmployee : 'ALL',
-        filterYear: savedFilters?.filterYear !== undefined ? savedFilters.filterYear : 'ALL',
+        filterYear: (savedFilters?.filterYear && savedFilters.filterYear !== 'ALL') ? savedFilters.filterYear : (new Date().getFullYear().toString()),
         filterMonth: savedFilters?.filterMonth !== undefined ? savedFilters.filterMonth : 'ALL',
         filterStatus: savedFilters?.filterStatus !== undefined ? savedFilters.filterStatus : 'ALL', // 'ALL', 'normal', 'single_punch', 'leave', 'holiday'
         filterSearch: savedFilters?.filterSearch || '',
@@ -2843,13 +2848,11 @@
         kpiValPresent: document.getElementById('kpi-val-present'),
         kpiValSingle: document.getElementById('kpi-val-single'),
         kpiValLeave: document.getElementById('kpi-val-leave'),
-        kpiValHoliday: document.getElementById('kpi-val-holiday'),
 
         kpiEmployees: document.getElementById('kpi-employees'),
         kpiPresent: document.getElementById('kpi-present'),
         kpiSingle: document.getElementById('kpi-single'),
         kpiLeave: document.getElementById('kpi-leave'),
-        kpiHolidays: document.getElementById('kpi-holidays'),
 
         // Summary & Table & Calendar
         empSummaryGrid: document.getElementById('emp-summary-grid'),
@@ -2868,15 +2871,8 @@
         holidayModal: document.getElementById('holiday-modal'),
         btnCloseModal: document.getElementById('btn-close-modal'),
         btnSaveHolidays: document.getElementById('btn-save-holidays'),
-        modalHolidaysList: document.getElementById('modal-holidays-list'),
-        modalHolidayTotal: document.getElementById('modal-holiday-total'),
         modalGymCount: document.getElementById('modal-gym-count'),
         gymHolidayCountDisplay: document.getElementById('gym-holiday-count-display'),
-        headerHolidayCount: document.getElementById('header-holiday-count'),
-        inputNewHolidayDate: document.getElementById('input-new-holiday-date'),
-        inputNewHolidayName: document.getElementById('input-new-holiday-name'),
-        btnAddHoliday: document.getElementById('btn-add-holiday'),
-        btnResetDefaultHolidays: document.getElementById('btn-reset-default-holidays'),
 
         // Gym Holidays Form Elements
         inputGymHolidayDate: document.getElementById('input-gym-holiday-date'),
@@ -4007,24 +4003,25 @@
       });
 
       dom.btnResetFilters.addEventListener('click', () => {
+        const curY = new Date().getFullYear().toString();
         state.filterEmployee = 'ALL';
-        state.filterYear = 'ALL';
+        state.filterYear = curY;
         state.filterMonth = 'ALL';
         state.filterStatus = 'ALL';
         state.filterSearch = '';
         saveFilterState();
         dom.filterEmployee.value = 'ALL';
-        if (dom.filterYear) dom.filterYear.value = 'ALL';
+        if (dom.filterYear) dom.filterYear.value = curY;
         dom.filterMonth.value = 'ALL';
         dom.filterSearch.value = '';
-        if (dom.headerDateBadge) dom.headerDateBadge.textContent = '📅 ข้อมูลเวลาทุกปี';
+        if (dom.headerDateBadge) dom.headerDateBadge.textContent = `📅 ข้อมูลเวลาปี ${curY}`;
         updateYearPillsUI();
         updateEmployeePillsUI();
         updateMonthPillsUI();
         updateStatusPillsUI();
         state.currentPage = 1;
         renderAll();
-        showToast('🔄 ล้างตัวกรองและรีเซ็ตการแสดงผลเรียบร้อย', 'success');
+        showToast('🔄 ล้างตัวกรองและรีเซ็ตการแสดงผลเรียบร้อย (แสดงปีปัจจุบัน)', 'success');
       });
 
       // Month Pills
@@ -5098,7 +5095,7 @@
         dom.headerRecordsCount.textContent = `${state.records.length.toLocaleString()} รายการ`;
         dom.headerEmpCountBadge.textContent = `👥 พนักงาน ${state.employees.length} คน`;
         dom.headerDateBadge.textContent = `📄 ${pendingImportData.filename}`;
-        dom.btnResetDefaultData.style.display = 'inline-flex';
+        if (dom.btnResetDefaultData) dom.btnResetDefaultData.style.display = 'inline-flex';
 
         closeImportModal();
 
@@ -5108,27 +5105,29 @@
       });
 
       // Reset to Default Initial Data
-      dom.btnResetDefaultData.addEventListener('click', () => {
-        if (confirm('คุณต้องการรีเซ็ตข้อมูลกลับเป็นข้อมูลเริ่มต้นเดิม (ปี 2022 - 2026) หรือไม่?')) {
-          state.records = JSON.parse(JSON.stringify(defaultState.records));
-          state.employees = JSON.parse(JSON.stringify(defaultState.employees));
-          state.filterYear = 'ALL';
-          saveFilterState();
-          updateYearDropdown();
-          renderYearPills();
-          setupEmployeeSelectors();
-          state.filterEmployee = 'ALL';
-          state.currentPage = 1;
-          renderAll();
+      if (dom.btnResetDefaultData) {
+        dom.btnResetDefaultData.addEventListener('click', () => {
+          if (confirm('คุณต้องการรีเซ็ตข้อมูลกลับเป็นข้อมูลเริ่มต้นเดิม (ปี 2022 - 2026) หรือไม่?')) {
+            state.records = JSON.parse(JSON.stringify(defaultState.records));
+            state.employees = JSON.parse(JSON.stringify(defaultState.employees));
+            state.filterYear = new Date().getFullYear().toString();
+            saveFilterState();
+            updateYearDropdown();
+            renderYearPills();
+            setupEmployeeSelectors();
+            state.filterEmployee = 'ALL';
+            state.currentPage = 1;
+            renderAll();
 
-          dom.headerRecordsCount.textContent = `${state.records.length.toLocaleString()} รายการ`;
-          dom.headerEmpCountBadge.textContent = `👥 พนักงาน ${state.employees.length} คน`;
-          dom.headerDateBadge.textContent = `📅 ข้อมูลเวลาทุกปี`;
-          dom.btnResetDefaultData.style.display = 'none';
+            dom.headerRecordsCount.textContent = `${state.records.length.toLocaleString()} รายการ`;
+            dom.headerEmpCountBadge.textContent = `👥 พนักงาน ${state.employees.length} คน`;
+            dom.headerDateBadge.textContent = `📅 ข้อมูลเวลาปี ${state.filterYear}`;
+            dom.btnResetDefaultData.style.display = 'none';
 
-          showToast('🔄 คืนค่าข้อมูลเริ่มต้นเดิมเรียบร้อยแล้ว', 'warning');
-        }
-      });
+            showToast('🔄 คืนค่าข้อมูลเริ่มต้นเดิมเรียบร้อยแล้ว', 'warning');
+          }
+        });
+      }
 
       // Initial Setup & State Restoration
       rebuildHolidayMaps();
