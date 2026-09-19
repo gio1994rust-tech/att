@@ -2,6 +2,9 @@ import zipfile
 import xml.etree.ElementTree as ET
 import json
 import re
+import os
+import sqlite3
+import base64
 from datetime import datetime, timedelta
 
 NS = {'x': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
@@ -259,10 +262,176 @@ def process():
         'records': all_records
     }
 
-    # Write data.js for immediate script import
+    # Write data.js for legacy/fallback script import
     with open('data.js', 'w', encoding='utf-8') as f:
         f.write("window.ATTENDANCE_DATA = " + json.dumps(export_data, ensure_ascii=False, indent=2) + ";\n")
     print("data.js written successfully with all years (2022 - 2026)!")
+
+    # Create SQLite 3 Database (attendance.db) and Base64 fallback (attendance_db.js)
+    create_sqlite_db(known_employees, all_records)
+
+def create_sqlite_db(known_employees, all_records):
+    db_path = 'attendance.db'
+    if os.path.exists(db_path):
+        try:
+            os.remove(db_path)
+        except Exception:
+            pass
+    
+    print("Creating SQLite 3 database (attendance.db)...")
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # 1. Employees table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS employees (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            card_id TEXT
+        );
+    """)
+
+    # 2. Attendance records table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS attendance_records (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            emp_id TEXT NOT NULL,
+            card_id TEXT,
+            emp_name TEXT NOT NULL,
+            date TEXT NOT NULL,
+            iso_date TEXT NOT NULL,
+            year INTEGER NOT NULL,
+            month INTEGER NOT NULL,
+            day INTEGER NOT NULL,
+            day_of_week INTEGER NOT NULL,
+            count INTEGER NOT NULL DEFAULT 0,
+            punches TEXT,
+            check_in TEXT,
+            check_out TEXT,
+            work_hours REAL,
+            work_hours_formatted TEXT,
+            initial_status TEXT,
+            UNIQUE(emp_id, iso_date)
+        );
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_records_emp ON attendance_records(emp_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_records_iso_date ON attendance_records(iso_date);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_records_year ON attendance_records(year);")
+
+    # 3. Employee day-offs table (formerly LocalStorage)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS employee_dayoffs (
+            emp_id TEXT NOT NULL,
+            day_of_week INTEGER NOT NULL,
+            PRIMARY KEY (emp_id, day_of_week)
+        );
+    """)
+
+    # 4. Gym holidays table (formerly LocalStorage)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS gym_holidays (
+            holiday_date TEXT PRIMARY KEY,
+            holiday_name TEXT NOT NULL
+        );
+    """)
+
+    # 5. Leave reasons table (formerly LocalStorage)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS leave_reasons (
+            emp_id TEXT NOT NULL,
+            iso_date TEXT NOT NULL,
+            leave_type TEXT NOT NULL,
+            leave_label TEXT,
+            note TEXT,
+            updated_at TEXT,
+            PRIMARY KEY (emp_id, iso_date)
+        );
+    """)
+
+    # 6. App settings table (formerly LocalStorage: theme, filters, pagination, etc.)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS app_settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        );
+    """)
+
+    # Insert Employees
+    cursor.executemany(
+        "INSERT INTO employees (id, name, card_id) VALUES (?, ?, ?);",
+        [(e['id'], e['name'], e.get('cardId', e['id'])) for e in known_employees]
+    )
+
+    # Insert Attendance Records
+    cursor.executemany(
+        """
+        INSERT INTO attendance_records (
+            emp_id, card_id, emp_name, date, iso_date, year, month, day, day_of_week,
+            count, punches, check_in, check_out, work_hours, work_hours_formatted, initial_status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        """,
+        [
+            (
+                r['empId'],
+                r.get('cardId', ''),
+                r['empName'],
+                r['date'],
+                r['isoDate'],
+                r['year'],
+                r['month'],
+                r['day'],
+                r['dayOfWeek'],
+                r['count'],
+                json.dumps(r['punches'], ensure_ascii=False),
+                r.get('checkIn', ''),
+                r.get('checkOut', ''),
+                r.get('workHours'),
+                r.get('workHoursFormatted', ''),
+                r.get('initialStatus', 'absent')
+            )
+            for r in all_records
+        ]
+    )
+
+    # Default Empirical Day-Offs
+    default_dayoffs = [
+        ('10001', 3), ('10001', 6), # Bumroongchat: Thu, Sun
+        ('10002', 6),               # Weerayuth: Sun
+        ('10003', 6),               # Sujika: Sun
+        ('10005', 5), ('10005', 6), # Amnaj: Sat, Sun
+        ('10006', 0), ('10006', 1), ('10006', 2), ('10006', 4), ('10006', 6) # ประวิทย์: Mon, Tue, Wed, Fri, Sun
+    ]
+    cursor.executemany("INSERT INTO employee_dayoffs (emp_id, day_of_week) VALUES (?, ?);", default_dayoffs)
+
+    # Default App Settings (Theme, Saved Filters)
+    default_settings = [
+        ('app_theme', 'light'),
+        ('saved_filters', json.dumps({
+            "filterYear": "2026",
+            "filterMonth": "ALL",
+            "filterEmployee": "ALL",
+            "filterStatus": "ALL",
+            "filterSearch": "",
+            "activeView": "summary",
+            "pageSize": 50
+        }, ensure_ascii=False))
+    ]
+    cursor.executemany("INSERT INTO app_settings (key, value) VALUES (?, ?);", default_settings)
+
+    conn.commit()
+    conn.close()
+
+    db_size = os.path.getsize(db_path)
+    print(f"attendance.db created successfully! Total records: {len(all_records)}, Size: {db_size:,} bytes")
+
+    # Read binary and generate attendance_db.js for offline/file:// base64 fallback
+    with open(db_path, 'rb') as f:
+        db_bytes = f.read()
+        db_b64 = base64.b64encode(db_bytes).decode('ascii')
+
+    with open('attendance_db.js', 'w', encoding='utf-8') as f:
+        f.write(f"window.SQLITE_DB_BASE64 = '{db_b64}';\n")
+    print("attendance_db.js written successfully with Base64 SQLite database!")
 
 if __name__ == '__main__':
     process()

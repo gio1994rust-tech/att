@@ -1062,39 +1062,228 @@
       cursor: default;
     }
 
+    /* 1. มาปกติ (Fresh Emerald Green) */
     .calendar-day-cell.is-normal {
-      border-left: 4px solid var(--success);
-      background: rgba(16, 185, 129, 0.04);
+      border: 1.5px solid #86efac;
+      border-left: 6px solid #10b981;
+      background: #f0fdf4;
+    }
+    .calendar-day-cell.is-normal .cell-date-num {
+      color: #15803d;
+    }
+    .calendar-day-cell.is-normal .cell-time-line {
+      color: #166534;
+      font-weight: 500;
+    }
+    .calendar-day-cell.is-normal .cell-time-line strong {
+      color: #065f46;
+      font-weight: 700;
     }
 
+    /* 2. สแกน 1 ครั้ง / ลืมสแกน (Amber Warning) */
     .calendar-day-cell.is-single {
-      border-left: 4px solid var(--warning);
-      background: rgba(245, 158, 11, 0.05);
+      border: 1.5px solid #fde68a;
+      border-left: 6px solid #f59e0b;
+      background: #fffbeb;
+    }
+    .calendar-day-cell.is-single .cell-date-num {
+      color: #b45309;
+    }
+    .calendar-day-cell.is-single .cell-time-line {
+      color: #92400e;
+      font-weight: 500;
+    }
+    .calendar-day-cell.is-single .cell-time-line strong {
+      color: #78350f;
+      font-weight: 700;
     }
 
-    .calendar-day-cell.is-leave {
-      border-left: 4px solid var(--danger);
-      background: rgba(239, 68, 68, 0.06);
-    }
-
-    .calendar-day-cell.is-leave.is-sick {
-      border-left: 4px solid #ef4444;
-      background: rgba(239, 68, 68, 0.08);
-    }
-
-    .calendar-day-cell.is-leave.is-vacation {
-      border-left: 4px solid #10b981;
-      background: rgba(16, 185, 129, 0.08);
-    }
-
-    .calendar-day-cell.is-leave.is-business {
-      border-left: 4px solid #8b5cf6;
-      background: rgba(139, 92, 246, 0.08);
-    }
-
+    /* 3. วันหยุดประจำสัปดาห์ (Sky Blue) */
     .calendar-day-cell.is-holiday {
-      border-left: 4px solid var(--holiday);
-      background: rgba(14, 165, 233, 0.04);
+      border: 1.5px solid #bae6fd;
+      border-left: 6px solid #0284c7;
+      background: #f0f9ff;
+    }
+    .calendar-day-cell.is-holiday .cell-date-num {
+      color: #0369a1;
+    }
+    .calendar-day-cell.is-holiday .cell-body-empty {
+      color: #0284c7 !important;
+      font-weight: 600;
+      font-size: 0.73rem;
+    }
+
+    /* 4. วันหยุดประจำยิม (Royal Blue) */
+    .calendar-day-cell.is-gym-holiday {
+      border: 1.5px solid #bfdbfe !important;
+      border-left: 6px solid #2563eb !important;
+      background: #eff6ff !important;
+    }
+    .calendar-day-cell.is-gym-holiday .cell-date-num {
+      color: #1d4ed8 !important;
+    }
+    .calendar-day-cell.is-gym-holiday .cell-body-empty {
+      color: #1e40af !important;
+      font-weight: 600;
+      font-size: 0.73rem;
+    }
+
+    /* 5. ขาดงาน / วันลาไม่ระบุ (Vivid Coral Red) */
+    .calendar-day-cell.is-leave {
+      border: 1.5px solid #fecaca;
+      border-left: 6px solid #ef4444;
+      background: #fef2f2;
+    }
+    .calendar-day-cell.is-leave .cell-date-num {
+      color: #b91c1c;
+    }
+    .calendar-day-cell.is-leave .cell-body-empty {
+      color: #b91c1c !important;
+      font-weight: 600;
+      font-size: 0.73rem;
+    }
+
+    /* 6. ลาป่วย (Rose / Crimson) */
+    .calendar-day-cell.is-leave.is-sick {
+      border: 1.5px solid #fecdd3;
+      border-left: 6px solid #f43f5e;
+      background: #fff1f2;
+    }
+    .calendar-day-cell.is-leave.is-sick .cell-date-num {
+      color: #be123c;
+    }
+    .calendar-day-cell.is-leave.is-sick .cell-body-empty {
+      color: #9f1239 !important;
+      font-weight: 600;
+      font-size: 0.73rem;
+    }
+
+    /* 7. ลาพักร้อน (Teal / Turquoise) */
+    .calendar-day-cell.is-leave.is-vacation {
+      border: 1.5px solid #99f6e4;
+      border-left: 6px solid #0d9488;
+      background: #f0fdfa;
+    }
+    .calendar-day-cell.is-leave.is-vacation .cell-date-num {
+      color: #0f766e;
+    }
+    .calendar-day-cell.is-leave.is-vacation .cell-body-empty {
+      color: #115e59 !important;
+      font-weight: 600;
+      font-size: 0.73rem;
+    }
+
+    /* 8. ลากิจ (Violet / Purple) */
+    .calendar-day-cell.is-leave.is-business {
+      border: 1.5px solid #ddd6fe;
+      border-left: 6px solid #8b5cf6;
+      background: #f5f3ff;
+    }
+    .calendar-day-cell.is-leave.is-business .cell-date-num {
+      color: #6d28d9;
+    }
+    .calendar-day-cell.is-leave.is-business .cell-body-empty {
+      color: #5b21b6 !important;
+      font-weight: 600;
+      font-size: 0.73rem;
+    }
+
+    /* 9. ลาคลอด (Pink) */
+    .calendar-day-cell.is-leave.is-maternity {
+      border: 1.5px solid #fbcfe8;
+      border-left: 6px solid #ec4899;
+      background: #fdf2f8;
+    }
+    .calendar-day-cell.is-leave.is-maternity .cell-date-num {
+      color: #be185d;
+    }
+    .calendar-day-cell.is-leave.is-maternity .cell-body-empty {
+      color: #9d174d !important;
+      font-weight: 600;
+      font-size: 0.73rem;
+    }
+
+    /* Dark Mode Distinct Overrides */
+    [data-theme="dark"] .calendar-day-cell.is-normal {
+      background: #052e16 !important;
+      border-color: #166534 !important;
+      border-left: 6px solid #22c55e !important;
+    }
+    [data-theme="dark"] .calendar-day-cell.is-normal .cell-date-num,
+    [data-theme="dark"] .calendar-day-cell.is-normal .cell-time-line,
+    [data-theme="dark"] .calendar-day-cell.is-normal .cell-time-line strong {
+      color: #86efac !important;
+    }
+
+    [data-theme="dark"] .calendar-day-cell.is-single {
+      background: #451a03 !important;
+      border-color: #92400e !important;
+      border-left: 6px solid #f59e0b !important;
+    }
+    [data-theme="dark"] .calendar-day-cell.is-single .cell-date-num,
+    [data-theme="dark"] .calendar-day-cell.is-single .cell-time-line,
+    [data-theme="dark"] .calendar-day-cell.is-single .cell-time-line strong {
+      color: #fde68a !important;
+    }
+
+    [data-theme="dark"] .calendar-day-cell.is-holiday {
+      background: #082f49 !important;
+      border-color: #0369a1 !important;
+      border-left: 6px solid #0ea5e9 !important;
+    }
+    [data-theme="dark"] .calendar-day-cell.is-holiday .cell-date-num,
+    [data-theme="dark"] .calendar-day-cell.is-holiday .cell-body-empty {
+      color: #7dd3fc !important;
+    }
+
+    [data-theme="dark"] .calendar-day-cell.is-gym-holiday {
+      background: #172554 !important;
+      border-color: #1e40af !important;
+      border-left: 6px solid #3b82f6 !important;
+    }
+    [data-theme="dark"] .calendar-day-cell.is-gym-holiday .cell-date-num,
+    [data-theme="dark"] .calendar-day-cell.is-gym-holiday .cell-body-empty {
+      color: #93c5fd !important;
+    }
+
+    [data-theme="dark"] .calendar-day-cell.is-leave {
+      background: #450a0a !important;
+      border-color: #991b1b !important;
+      border-left: 6px solid #ef4444 !important;
+    }
+    [data-theme="dark"] .calendar-day-cell.is-leave .cell-date-num,
+    [data-theme="dark"] .calendar-day-cell.is-leave .cell-body-empty {
+      color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .calendar-day-cell.is-leave.is-sick {
+      background: #4c0519 !important;
+      border-color: #9f1239 !important;
+      border-left: 6px solid #f43f5e !important;
+    }
+    [data-theme="dark"] .calendar-day-cell.is-leave.is-sick .cell-date-num,
+    [data-theme="dark"] .calendar-day-cell.is-leave.is-sick .cell-body-empty {
+      color: #fda4af !important;
+    }
+
+    [data-theme="dark"] .calendar-day-cell.is-leave.is-vacation {
+      background: #042f2e !important;
+      border-color: #115e59 !important;
+      border-left: 6px solid #14b8a6 !important;
+    }
+    [data-theme="dark"] .calendar-day-cell.is-leave.is-vacation .cell-date-num,
+    [data-theme="dark"] .calendar-day-cell.is-leave.is-vacation .cell-body-empty {
+      color: #5eead4 !important;
+    }
+
+    [data-theme="dark"] .calendar-day-cell.is-leave.is-business {
+      background: #2e1065 !important;
+      border-color: #5b21b6 !important;
+      border-left: 6px solid #a855f7 !important;
+    }
+    [data-theme="dark"] .calendar-day-cell.is-leave.is-business .cell-date-num,
+    [data-theme="dark"] .calendar-day-cell.is-leave.is-business .cell-body-empty {
+      color: #c4b5fd !important;
     }
 
     .cell-top {
@@ -1110,15 +1299,72 @@
     }
 
     .cell-badge {
-      font-size: 0.65rem;
-      font-weight: 600;
-      padding: 1px 5px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 7px;
       border-radius: var(--radius-full);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      white-space: nowrap;
+      letter-spacing: 0.2px;
+    }
+
+    .cell-badge.badge-success {
+      background: #10b981 !important;
+      color: #ffffff !important;
+      border: none !important;
+    }
+
+    .cell-badge.badge-warning {
+      background: #d97706 !important;
+      color: #ffffff !important;
+      border: none !important;
+    }
+
+    .cell-badge.badge-holiday {
+      background: #0284c7 !important;
+      color: #ffffff !important;
+      border: none !important;
+    }
+
+    .cell-badge.badge-gym-holiday {
+      background: #2563eb !important;
+      color: #ffffff !important;
+      border: none !important;
+    }
+
+    .cell-badge.badge-danger {
+      background: #dc2626 !important;
+      color: #ffffff !important;
+      border: none !important;
+    }
+
+    .cell-badge.badge-sick {
+      background: #e11d48 !important;
+      color: #ffffff !important;
+      border: none !important;
+    }
+
+    .cell-badge.badge-vacation {
+      background: #0d9488 !important;
+      color: #ffffff !important;
+      border: none !important;
+    }
+
+    .cell-badge.badge-business {
+      background: #7c3aed !important;
+      color: #ffffff !important;
+      border: none !important;
+    }
+
+    .cell-badge.badge-maternity {
+      background: #db2777 !important;
+      color: #ffffff !important;
+      border: none !important;
     }
 
     .cell-body {
-      margin-top: 4px;
-      font-size: 0.72rem;
+      margin-top: 5px;
+      font-size: 0.74rem;
     }
 
     .cell-time-line {
@@ -1126,6 +1372,7 @@
       align-items: center;
       justify-content: space-between;
       color: var(--text-muted);
+      margin-bottom: 2px;
     }
 
     .cell-time-line strong {
@@ -2143,17 +2390,28 @@
           <h1>
             ระบบตรวจเช็คเวลาปฏิบัติงานพนักงาน
           </h1>
-          <p>
+          <p style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
             <span id="header-date-badge">📅 ข้อมูลเวลาทุกปี</span>
             <span>•</span>
             <span id="header-emp-count-badge">👥 พนักงาน 5 คน</span>
             <span>•</span>
             <span id="header-records-count">7,290 รายการ</span>
+            <span>•</span>
+            <span id="header-sqlite-badge" class="badge" style="background:#0284c7; color:#ffffff; font-weight:600; font-size:0.75rem; padding:3px 8px; border-radius:10px;">🗄️ SQLite 3 (Active)</span>
           </p>
         </div>
       </div>
 
       <div class="header-actions">
+        <!-- SQLite Database Tools -->
+        <button class="btn" id="btn-export-sqlite" title="ดาวน์โหลดฐานข้อมูล SQLite 3 (.db) เพื่อนำไปเปิดในโปรแกรมอื่นหรือสำรองข้อมูล" style="border-color:#0284c7; color:#0284c7; font-weight:600;">
+          💾 ดาวน์โหลด .db
+        </button>
+        <button class="btn" id="btn-import-sqlite" title="นำเข้าฐานข้อมูล SQLite (.db, .sqlite)" style="border-color:#0284c7; color:#0284c7; font-weight:600;">
+          📂 นำเข้า .db
+        </button>
+        <input type="file" id="sqlite-file-input" accept=".db,.sqlite,.sqlite3" style="display:none;">
+
         <!-- Import Data Trigger (เด่นชัด) -->
         <button class="btn btn-primary" id="btn-open-import" title="นำเข้าไฟล์ Excel (.xlsx, .xls)">
           <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
@@ -2177,7 +2435,7 @@
 
         <!-- Reset to default data button (แสดงเมื่อมีข้อมูลนำเข้า) -->
         <button class="btn" id="btn-reset-default-data" title="กลับไปใช้ข้อมูลเริ่มต้นเดิม" style="display:none;">
-          🔄 ข้อมูลเริ่มต้น
+          🔄 คืนค่าเริ่มต้น
         </button>
 
         <!-- Print View -->
@@ -2426,18 +2684,30 @@
             </p>
           </div>
 
-          <div class="calendar-legend">
-            <div class="legend-item">
-              <div class="legend-color" style="background:var(--success)"></div> มาปกติ (มีเวลาเข้า-ออก)
+          <div class="calendar-legend" style="display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center;">
+            <div class="legend-item" style="display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600;">
+              <span style="display:inline-block; width:13px; height:13px; border-radius:3px; background:#10b981; border:1.5px solid #059669;"></span> มาปกติ
             </div>
-            <div class="legend-item">
-              <div class="legend-color" style="background:var(--warning)"></div> สแกน 1 ครั้ง (ลืมสแกน)
+            <div class="legend-item" style="display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600;">
+              <span style="display:inline-block; width:13px; height:13px; border-radius:3px; background:#f59e0b; border:1.5px solid #d97706;"></span> สแกน 1 ครั้ง
             </div>
-            <div class="legend-item">
-              <div class="legend-color" style="background:var(--danger)"></div> 🔴 วันลา / ขาดงาน
+            <div class="legend-item" style="display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600;">
+              <span style="display:inline-block; width:13px; height:13px; border-radius:3px; background:#0284c7; border:1.5px solid #0369a1;"></span> วันหยุดประจำตัว
             </div>
-            <div class="legend-item">
-              <div class="legend-color" style="background:var(--holiday)"></div> 🏖️ วันหยุด / เสาร์-อาทิตย์
+            <div class="legend-item" style="display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600;">
+              <span style="display:inline-block; width:13px; height:13px; border-radius:3px; background:#2563eb; border:1.5px solid #1d4ed8;"></span> วันหยุดยิม
+            </div>
+            <div class="legend-item" style="display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600;">
+              <span style="display:inline-block; width:13px; height:13px; border-radius:3px; background:#ef4444; border:1.5px solid #dc2626;"></span> ขาดงาน/ลางาน
+            </div>
+            <div class="legend-item" style="display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600;">
+              <span style="display:inline-block; width:13px; height:13px; border-radius:3px; background:#e11d48; border:1.5px solid #be123c;"></span> 🩺 ลาป่วย
+            </div>
+            <div class="legend-item" style="display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600;">
+              <span style="display:inline-block; width:13px; height:13px; border-radius:3px; background:#0d9488; border:1.5px solid #0f766e;"></span> 🏖️ พักร้อน
+            </div>
+            <div class="legend-item" style="display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600;">
+              <span style="display:inline-block; width:13px; height:13px; border-radius:3px; background:#7c3aed; border:1.5px solid #6d28d9;"></span> 📋 ลากิจ
             </div>
           </div>
         </div>
@@ -2594,7 +2864,7 @@
         <!-- TAB 1: Staff Weekly Day-Offs -->
         <div class="modal-subtab-panel active" id="tab-staff-dayoffs">
           <div style="background:var(--primary-light); border:1px solid var(--primary-border); padding:12px 16px; border-radius:var(--radius-sm); font-size:0.83rem; color:var(--text-main);">
-            💡 <strong>คำอธิบาย:</strong> พนักงานแต่ละคนหยุดไม่ตรงกันได้ เช่น <strong>บางคนหยุดทุกวันอังคาร</strong> หรือหยุดเสาร์-อาทิตย์ เมื่อถึงวันหยุดประจำตัวของพนักงาน ระบบจะนำมาคัดกรอง <u>ไม่นับเป็นวันลา/ขาดงาน</u> และบันทึกลงในฐานข้อมูล (LocalStorage) ค้างไว้ถาวร
+            💡 <strong>คำอธิบาย:</strong> พนักงานแต่ละคนหยุดไม่ตรงกันได้ เช่น <strong>บางคนหยุดทุกวันอังคาร</strong> หรือหยุดเสาร์-อาทิตย์ เมื่อถึงวันหยุดประจำตัวของพนักงาน ระบบจะนำมาคัดกรอง <u>ไม่นับเป็นวันลา/ขาดงาน</u> และบันทึกลงในฐานข้อมูล <strong>SQLite 3</strong> ค้างไว้ถาวร
           </div>
 
           <!-- Employee Day-offs Cards Container -->
@@ -2642,7 +2912,7 @@
       <div class="modal-footer" style="justify-content:space-between;">
         <div style="font-size:0.78rem; color:var(--success-text); display:flex; align-items:center; gap:6px;">
           <span>💾</span>
-          <span>บันทึกในฐานข้อมูล Browser (LocalStorage) อัตโนมัติ</span>
+          <span>บันทึกในฐานข้อมูล SQLite 3 อัตโนมัติ (พร้อมระบบ Auto-Sync)</span>
         </div>
         <div style="display:flex; gap:8px;">
           <button class="btn" id="btn-cancel-holidays-modal">ปิด</button>
@@ -2670,49 +2940,266 @@
     </div>
   </div>
 
-  <!-- Load pre-parsed attendance data -->
+  <!-- SQLite 3 WebAssembly & Attendance Database -->
+  <script src="sql-wasm.js"></script>
+  <script src="attendance_db.js"></script>
   <script src="data.js"></script>
 
   <!-- Application Logic -->
   <script>
-    (function () {
-      // Check if data is available
-      if (!window.ATTENDANCE_DATA) {
-        alert("ไม่พบข้อมูล attendance data กรุณาเปิดผ่านเว็บเซิร์ฟเวอร์หรือรัน generate_cleaned_data.py");
-        return;
-      }
+    (async function () {
+      // ==========================================
+      // SQLite 3 WebAssembly Database Manager
+      // ==========================================
+      let db = null;
+      let SQL = null;
 
-      // LocalStorage Database Keys
-      const DB_KEYS = {
-        DAYOFFS: 'att_employee_dayoffs',
-        GYM_HOLIDAYS: 'att_gym_holidays',
-        SAVED_FILTERS: 'att_saved_filters',
-        LEAVE_REASONS: 'att_leave_reasons'
+      // IndexedDB persistence helper to retain live SQLite database binary across reloads
+      const IDB_STORE = {
+        dbName: 'AttSqliteDBStore',
+        storeName: 'sqlite_store',
+        async get(key) {
+          return new Promise((resolve) => {
+            try {
+              const req = indexedDB.open(this.dbName, 1);
+              req.onupgradeneeded = () => req.result.createObjectStore(this.storeName);
+              req.onsuccess = () => {
+                const idb = req.result;
+                const tx = idb.transaction(this.storeName, 'readonly');
+                const getReq = tx.objectStore(this.storeName).get(key);
+                getReq.onsuccess = () => resolve(getReq.result);
+                getReq.onerror = () => resolve(null);
+              };
+              req.onerror = () => resolve(null);
+            } catch (e) {
+              resolve(null);
+            }
+          });
+        },
+        async set(key, value) {
+          return new Promise((resolve) => {
+            try {
+              const req = indexedDB.open(this.dbName, 1);
+              req.onupgradeneeded = () => req.result.createObjectStore(this.storeName);
+              req.onsuccess = () => {
+                const idb = req.result;
+                const tx = idb.transaction(this.storeName, 'readwrite');
+                tx.objectStore(this.storeName).put(value, key);
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => resolve(false);
+              };
+              req.onerror = () => resolve(false);
+            } catch (e) {
+              resolve(false);
+            }
+          });
+        },
+        async delete(key) {
+          return new Promise((resolve) => {
+            try {
+              const req = indexedDB.open(this.dbName, 1);
+              req.onupgradeneeded = () => req.result.createObjectStore(this.storeName);
+              req.onsuccess = () => {
+                const idb = req.result;
+                const tx = idb.transaction(this.storeName, 'readwrite');
+                tx.objectStore(this.storeName).delete(key);
+                tx.oncomplete = () => resolve(true);
+              };
+              req.onerror = () => resolve(false);
+            } catch (e) {
+              resolve(false);
+            }
+          });
+        }
       };
 
-      // Load persistent Leave Reasons from LocalStorage
-      function loadLeaveReasons() {
+      function createTablesIfNotExist() {
+        if (!db) return;
+        db.run(`
+          CREATE TABLE IF NOT EXISTS employees (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            card_id TEXT
+          );
+          CREATE TABLE IF NOT EXISTS attendance_records (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            emp_id TEXT NOT NULL,
+            card_id TEXT,
+            emp_name TEXT NOT NULL,
+            date TEXT NOT NULL,
+            iso_date TEXT NOT NULL,
+            year INTEGER NOT NULL,
+            month INTEGER NOT NULL,
+            day INTEGER NOT NULL,
+            day_of_week INTEGER NOT NULL,
+            count INTEGER NOT NULL DEFAULT 0,
+            punches TEXT,
+            check_in TEXT,
+            check_out TEXT,
+            work_hours REAL,
+            work_hours_formatted TEXT,
+            initial_status TEXT,
+            UNIQUE(emp_id, iso_date)
+          );
+          CREATE INDEX IF NOT EXISTS idx_records_emp ON attendance_records(emp_id);
+          CREATE INDEX IF NOT EXISTS idx_records_iso_date ON attendance_records(iso_date);
+          CREATE INDEX IF NOT EXISTS idx_records_year ON attendance_records(year);
+          CREATE TABLE IF NOT EXISTS employee_dayoffs (
+            emp_id TEXT NOT NULL,
+            day_of_week INTEGER NOT NULL,
+            PRIMARY KEY (emp_id, day_of_week)
+          );
+          CREATE TABLE IF NOT EXISTS gym_holidays (
+            holiday_date TEXT PRIMARY KEY,
+            holiday_name TEXT NOT NULL
+          );
+          CREATE TABLE IF NOT EXISTS leave_reasons (
+            emp_id TEXT NOT NULL,
+            iso_date TEXT NOT NULL,
+            leave_type TEXT NOT NULL,
+            leave_label TEXT,
+            note TEXT,
+            updated_at TEXT,
+            PRIMARY KEY (emp_id, iso_date)
+          );
+          CREATE TABLE IF NOT EXISTS app_settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+          );
+        `);
+      }
+
+      function persistDatabase() {
+        if (!db) return;
         try {
-          const raw = localStorage.getItem(DB_KEYS.LEAVE_REASONS);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            if (typeof parsed === 'object' && parsed !== null) return parsed;
+          const binary = db.export();
+          IDB_STORE.set('active_attendance_sqlite_db', binary);
+        } catch (e) {
+          console.error("Failed to persist SQLite DB:", e);
+        }
+      }
+
+      async function initSQLiteDatabase() {
+        try {
+          const locateWasm = (file) => {
+            if (window.location.protocol === 'file:') {
+              return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.12.0/sql-wasm.wasm';
+            }
+            return 'sql-wasm.wasm';
+          };
+          SQL = await initSqlJs({ locateFile: locateWasm });
+        } catch (wasmErr) {
+          console.warn("Local WASM load attempt failed, trying CDN fallback:", wasmErr);
+          try {
+            SQL = await initSqlJs({
+              locateFile: () => 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.12.0/sql-wasm.wasm'
+            });
+          } catch (cdnErr) {
+            console.error("Critical: Failed to initialize SQLite WASM:", cdnErr);
+            alert("ไม่สามารถเริ่มต้นระบบ SQLite WebAssembly ได้: " + cdnErr.message);
+            return false;
+          }
+        }
+
+        let u8 = null;
+        // 1. Try to load saved binary from IndexedDB
+        try {
+          const saved = await IDB_STORE.get('active_attendance_sqlite_db');
+          if (saved && saved.byteLength > 0) {
+            u8 = new Uint8Array(saved);
           }
         } catch (e) {
-          console.error("Failed to load leave reasons", e);
+          console.warn("IndexedDB load error:", e);
         }
-        return {};
+
+        // 2. If not in IndexedDB and on HTTP / Vercel, fetch attendance.db
+        if (!u8 && window.location.protocol !== 'file:') {
+          try {
+            const resp = await fetch('attendance.db');
+            if (resp.ok) {
+              const buf = await resp.arrayBuffer();
+              u8 = new Uint8Array(buf);
+            }
+          } catch (e) {
+            console.warn("fetch attendance.db failed:", e);
+          }
+        }
+
+        // 3. Fallback: Base64 from attendance_db.js
+        if (!u8 && window.SQLITE_DB_BASE64) {
+          try {
+            const binaryStr = atob(window.SQLITE_DB_BASE64);
+            u8 = new Uint8Array(binaryStr.length);
+            for (let i = 0; i < binaryStr.length; i++) {
+              u8[i] = binaryStr.charCodeAt(i);
+            }
+          } catch (e) {
+            console.error("Base64 SQLite decode failed:", e);
+          }
+        }
+
+        if (u8) {
+          db = new SQL.Database(u8);
+        } else {
+          db = new SQL.Database();
+          createTablesIfNotExist();
+          if (window.ATTENDANCE_DATA) {
+            populateSQLiteFromAttendanceData(window.ATTENDANCE_DATA);
+          }
+        }
+
+        createTablesIfNotExist();
+        return true;
       }
 
-      function saveLeaveReasonsToDB() {
+      function populateSQLiteFromAttendanceData(data) {
+        if (!db || !data) return;
         try {
-          localStorage.setItem(DB_KEYS.LEAVE_REASONS, JSON.stringify(state.leaveReasons));
+          db.run("BEGIN TRANSACTION;");
+          if (data.employees) {
+            const empStmt = db.prepare("INSERT OR REPLACE INTO employees (id, name, card_id) VALUES (?, ?, ?);");
+            for (const emp of data.employees) {
+              empStmt.run([emp.id, emp.name, emp.cardId || emp.id]);
+            }
+            empStmt.free();
+          }
+          if (data.records) {
+            const recStmt = db.prepare(`
+              INSERT OR REPLACE INTO attendance_records (
+                emp_id, card_id, emp_name, date, iso_date, year, month, day, day_of_week,
+                count, punches, check_in, check_out, work_hours, work_hours_formatted, initial_status
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            `);
+            for (const r of data.records) {
+              recStmt.run([
+                r.empId,
+                r.cardId || '',
+                r.empName,
+                r.date,
+                r.isoDate,
+                r.year,
+                r.month,
+                r.day,
+                r.dayOfWeek,
+                r.count || 0,
+                JSON.stringify(r.punches || []),
+                r.checkIn || '',
+                r.checkOut || '',
+                r.workHours !== undefined ? r.workHours : null,
+                r.workHoursFormatted || '',
+                r.initialStatus || 'absent'
+              ]);
+            }
+            recStmt.free();
+          }
+          db.run("COMMIT;");
         } catch (e) {
-          console.error("Failed to save leave reasons", e);
+          try { db.run("ROLLBACK;"); } catch (_) {}
+          console.error("populateSQLiteFromAttendanceData error:", e);
         }
       }
 
-      // Default Empirical Day-Offs for known staff (0=จันทร์, 1=อังคาร, 2=พุธ, 3=พฤหัส, 4=ศุกร์, 5=เสาร์, 6=อาทิตย์)
+      // Default Empirical Day-Offs for known staff
       const DEFAULT_STAFF_DAYOFFS = {
         '10001': [3, 6],         // Bumroongchat: หยุดพฤหัสบดี & อาทิตย์
         '10002': [6],            // Weerayuth: หยุดวันอาทิตย์
@@ -2721,58 +3208,227 @@
         '10006': [0, 1, 2, 4, 6] // ประวิทย์ ยาเพ็ชร: มาทำงานเฉพาะพฤหัสและเสาร์ -> หยุดจันทร์, อังคาร, พุธ, ศุกร์, อาทิตย์
       };
 
-      // Load persistent Day-Offs from LocalStorage
-      function loadEmployeeDayOffs() {
+      // SQLite Data Accessors
+      function loadEmployeesFromSQLite() {
+        if (!db) return [];
         try {
-          const raw = localStorage.getItem(DB_KEYS.DAYOFFS);
-          if (raw) {
-            return JSON.parse(raw);
+          const res = db.exec("SELECT id, name, card_id FROM employees WHERE id != '10004' AND LOWER(name) NOT LIKE '%thiti%' ORDER BY id ASC;");
+          if (!res || res.length === 0) return [];
+          return res[0].values.map(row => ({
+            id: String(row[0]),
+            name: String(row[1]),
+            cardId: String(row[2] || row[0])
+          }));
+        } catch (e) {
+          console.error("loadEmployeesFromSQLite error:", e);
+          return [];
+        }
+      }
+
+      function loadRecordsFromSQLite() {
+        if (!db) return [];
+        try {
+          const res = db.exec(`
+            SELECT emp_id, card_id, emp_name, date, iso_date, year, month, day, day_of_week,
+                   count, punches, check_in, check_out, work_hours, work_hours_formatted, initial_status
+            FROM attendance_records
+            WHERE emp_id != '10004' AND LOWER(emp_name) NOT LIKE '%thiti%'
+            ORDER BY iso_date ASC, emp_id ASC;
+          `);
+          if (!res || res.length === 0) return [];
+          return res[0].values.map(row => {
+            let punches = [];
+            try {
+              punches = row[10] ? JSON.parse(row[10]) : [];
+            } catch (err) {
+              punches = [];
+            }
+            return {
+              empId: String(row[0]),
+              cardId: String(row[1] || row[0]),
+              empName: String(row[2]),
+              date: String(row[3]),
+              isoDate: String(row[4]),
+              year: Number(row[5]),
+              month: Number(row[6]),
+              day: Number(row[7]),
+              dayOfWeek: Number(row[8]),
+              count: Number(row[9] || 0),
+              punches: punches,
+              checkIn: row[11] ? String(row[11]) : '',
+              checkOut: row[12] ? String(row[12]) : '',
+              workHours: row[13] !== null ? Number(row[13]) : null,
+              workHoursFormatted: row[14] ? String(row[14]) : '',
+              initialStatus: row[15] ? String(row[15]) : 'absent'
+            };
+          });
+        } catch (e) {
+          console.error("loadRecordsFromSQLite error:", e);
+          return [];
+        }
+      }
+
+      function loadEmployeeDayOffsFromSQLite() {
+        const dayoffs = {};
+        if (!db) return { ...DEFAULT_STAFF_DAYOFFS };
+        try {
+          const res = db.exec("SELECT emp_id, day_of_week FROM employee_dayoffs ORDER BY emp_id, day_of_week ASC;");
+          if (res && res.length > 0 && res[0].values.length > 0) {
+            res[0].values.forEach(row => {
+              const empId = String(row[0]);
+              const dow = Number(row[1]);
+              if (!dayoffs[empId]) dayoffs[empId] = [];
+              dayoffs[empId].push(dow);
+            });
+            return dayoffs;
           }
         } catch (e) {
-          console.error("Failed to load employee dayoffs", e);
+          console.error("loadEmployeeDayOffsFromSQLite error:", e);
         }
         return { ...DEFAULT_STAFF_DAYOFFS };
       }
 
       function saveEmployeeDayOffsToDB() {
+        if (!db) return;
         try {
-          localStorage.setItem(DB_KEYS.DAYOFFS, JSON.stringify(state.employeeDayOffs));
-        } catch (e) {}
+          db.run("BEGIN TRANSACTION;");
+          db.run("DELETE FROM employee_dayoffs;");
+          const stmt = db.prepare("INSERT INTO employee_dayoffs (emp_id, day_of_week) VALUES (?, ?);");
+          for (const empId in state.employeeDayOffs) {
+            const days = state.employeeDayOffs[empId] || [];
+            for (const d of days) {
+              stmt.run([empId, d]);
+            }
+          }
+          stmt.free();
+          db.run("COMMIT;");
+          persistDatabase();
+        } catch (e) {
+          try { db.run("ROLLBACK;"); } catch (_) {}
+          console.error("Failed to save employee dayoffs to SQLite:", e);
+        }
       }
 
-      // Load persistent Gym Holidays from LocalStorage
-      function loadGymHolidays() {
+      function loadGymHolidaysFromSQLite() {
+        if (!db) return [];
         try {
-          const raw = localStorage.getItem(DB_KEYS.GYM_HOLIDAYS);
-          if (raw) {
-            return JSON.parse(raw);
+          const res = db.exec("SELECT holiday_date, holiday_name FROM gym_holidays ORDER BY holiday_date ASC;");
+          if (res && res.length > 0) {
+            return res[0].values.map(row => ({
+              date: String(row[0]),
+              name: String(row[1])
+            }));
           }
         } catch (e) {
-          console.error("Failed to load gym holidays", e);
+          console.error("loadGymHolidaysFromSQLite error:", e);
         }
         return [];
       }
 
       function saveGymHolidaysToDB() {
+        if (!db) return;
         try {
-          localStorage.setItem(DB_KEYS.GYM_HOLIDAYS, JSON.stringify(state.gymHolidays));
-        } catch (e) {}
+          db.run("BEGIN TRANSACTION;");
+          db.run("DELETE FROM gym_holidays;");
+          const stmt = db.prepare("INSERT INTO gym_holidays (holiday_date, holiday_name) VALUES (?, ?);");
+          for (const gh of (state.gymHolidays || [])) {
+            stmt.run([gh.date, gh.name]);
+          }
+          stmt.free();
+          db.run("COMMIT;");
+          persistDatabase();
+        } catch (e) {
+          try { db.run("ROLLBACK;"); } catch (_) {}
+          console.error("Failed to save gym holidays to SQLite:", e);
+        }
       }
 
-      // Load persistent Filters
+      function loadLeaveReasonsFromSQLite() {
+        const reasons = {};
+        if (!db) return reasons;
+        try {
+          const res = db.exec("SELECT emp_id, iso_date, leave_type, leave_label, note, updated_at FROM leave_reasons;");
+          if (res && res.length > 0) {
+            res[0].values.forEach(row => {
+              const empId = String(row[0]);
+              const isoDate = String(row[1]);
+              const key = `${empId}_${isoDate}`;
+              reasons[key] = {
+                type: String(row[2] || ''),
+                label: String(row[3] || ''),
+                note: String(row[4] || ''),
+                updatedAt: String(row[5] || '')
+              };
+            });
+          }
+        } catch (e) {
+          console.error("loadLeaveReasonsFromSQLite error:", e);
+        }
+        return reasons;
+      }
+
+      function saveLeaveReasonsToDB() {
+        if (!db) return;
+        try {
+          db.run("BEGIN TRANSACTION;");
+          db.run("DELETE FROM leave_reasons;");
+          const stmt = db.prepare("INSERT INTO leave_reasons (emp_id, iso_date, leave_type, leave_label, note, updated_at) VALUES (?, ?, ?, ?, ?, ?);");
+          for (const key in (state.leaveReasons || {})) {
+            const parts = key.split('_');
+            const empId = parts[0];
+            const isoDate = parts.slice(1).join('_');
+            const item = state.leaveReasons[key];
+            if (item && empId && isoDate) {
+              stmt.run([empId, isoDate, item.type || '', item.label || '', item.note || '', item.updatedAt || '']);
+            }
+          }
+          stmt.free();
+          db.run("COMMIT;");
+          persistDatabase();
+        } catch (e) {
+          try { db.run("ROLLBACK;"); } catch (_) {}
+          console.error("Failed to save leave reasons to SQLite:", e);
+        }
+      }
+
+      function loadAppSettingFromSQLite(key, defaultVal) {
+        if (!db) return defaultVal;
+        try {
+          const stmt = db.prepare("SELECT value FROM app_settings WHERE key = ? LIMIT 1;");
+          stmt.bind([key]);
+          if (stmt.step()) {
+            const val = stmt.get()[0];
+            stmt.free();
+            return val;
+          }
+          stmt.free();
+        } catch (e) {
+          console.error("loadAppSettingFromSQLite error:", key, e);
+        }
+        return defaultVal;
+      }
+
+      function saveAppSettingToSQLite(key, value) {
+        if (!db) return;
+        try {
+          db.run("INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?);", [key, String(value)]);
+          persistDatabase();
+        } catch (e) {
+          console.error("Failed to save setting to SQLite:", key, e);
+        }
+      }
+
       function loadSavedFilters() {
         try {
-          const raw = localStorage.getItem(DB_KEYS.SAVED_FILTERS);
-          if (raw) {
-            return JSON.parse(raw);
-          }
+          const raw = loadAppSettingFromSQLite('saved_filters', null);
+          if (raw) return JSON.parse(raw);
         } catch (e) {}
         return null;
       }
 
       function saveFilterState() {
         try {
-          localStorage.setItem(DB_KEYS.SAVED_FILTERS, JSON.stringify({
+          const filterData = JSON.stringify({
             filterYear: state.filterYear,
             filterMonth: state.filterMonth,
             filterEmployee: state.filterEmployee,
@@ -2780,38 +3436,177 @@
             filterSearch: state.filterSearch,
             activeView: state.activeView,
             pageSize: state.pageSize
-          }));
+          });
+          saveAppSettingToSQLite('saved_filters', filterData);
         } catch (e) {}
+      }
+
+      function saveImportedDataToSQLite(validRecords, validEmployees, mode = 'replace') {
+        if (!db) return;
+        try {
+          db.run("BEGIN TRANSACTION;");
+          if (mode === 'replace') {
+            db.run("DELETE FROM attendance_records;");
+            db.run("DELETE FROM employees;");
+          }
+
+          const empStmt = db.prepare("INSERT OR REPLACE INTO employees (id, name, card_id) VALUES (?, ?, ?);");
+          for (const emp of validEmployees) {
+            empStmt.run([emp.id, emp.name, emp.cardId || emp.id]);
+          }
+          empStmt.free();
+
+          const recStmt = db.prepare(`
+            INSERT OR REPLACE INTO attendance_records (
+              emp_id, card_id, emp_name, date, iso_date, year, month, day, day_of_week,
+              count, punches, check_in, check_out, work_hours, work_hours_formatted, initial_status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+          `);
+
+          for (const r of validRecords) {
+            recStmt.run([
+              r.empId,
+              r.cardId || '',
+              r.empName,
+              r.date,
+              r.isoDate,
+              r.year,
+              r.month,
+              r.day,
+              r.dayOfWeek,
+              r.count || 0,
+              JSON.stringify(r.punches || []),
+              r.checkIn || '',
+              r.checkOut || '',
+              r.workHours !== undefined ? r.workHours : null,
+              r.workHoursFormatted || '',
+              r.initialStatus || 'absent'
+            ]);
+          }
+          recStmt.free();
+
+          db.run("COMMIT;");
+          persistDatabase();
+          console.log(`Saved ${validRecords.length} records to SQLite successfully (mode: ${mode})`);
+        } catch (e) {
+          try { db.run("ROLLBACK;"); } catch (_) {}
+          console.error("saveImportedDataToSQLite error:", e);
+        }
+      }
+
+      function exportSQLiteDatabaseFile() {
+        if (!db) {
+          alert("ฐานข้อมูล SQLite ยังไม่พร้อมใช้งาน");
+          return;
+        }
+        try {
+          const binary = db.export();
+          const blob = new Blob([binary], { type: 'application/x-sqlite3' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          const timestamp = new Date().toISOString().slice(0, 10);
+          a.href = url;
+          a.download = `attendance_${timestamp}.db`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showToast('💾 ดาวน์โหลดฐานข้อมูล SQLite (attendance.db) สำเร็จ', 'success');
+        } catch (e) {
+          console.error("Export SQLite DB error:", e);
+          showToast('❌ เกิดข้อผิดพลาดในการส่งออกฐานข้อมูล: ' + e.message, 'danger');
+        }
+      }
+
+      async function importSQLiteDatabaseFile(file) {
+        if (!file) return;
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const u8 = new Uint8Array(arrayBuffer);
+          const testDb = new SQL.Database(u8);
+          const chk = testDb.exec("SELECT count(*) FROM sqlite_master WHERE type='table';");
+          if (!chk || chk.length === 0) {
+            throw new Error("ไฟล์ไม่ใช่ SQLite Database ที่ถูกต้อง");
+          }
+          db = testDb;
+          createTablesIfNotExist();
+          persistDatabase();
+
+          // Reload state from new SQLite database
+          state.employees = loadEmployeesFromSQLite();
+          state.records = loadRecordsFromSQLite();
+          state.employeeDayOffs = loadEmployeeDayOffsFromSQLite();
+          state.gymHolidays = loadGymHolidaysFromSQLite();
+          state.leaveReasons = loadLeaveReasonsFromSQLite();
+          const sf = loadSavedFilters();
+          if (sf) {
+            if (sf.filterYear) state.filterYear = sf.filterYear;
+            if (sf.filterMonth) state.filterMonth = sf.filterMonth;
+            if (sf.filterEmployee) state.filterEmployee = sf.filterEmployee;
+            if (sf.filterStatus) state.filterStatus = sf.filterStatus;
+            if (sf.filterSearch) state.filterSearch = sf.filterSearch;
+            if (sf.activeView) state.activeView = sf.activeView;
+            if (sf.pageSize) state.pageSize = parseInt(sf.pageSize, 10);
+          }
+          state.theme = loadAppSettingFromSQLite('app_theme', 'light');
+          applyTheme(state.theme);
+
+          rebuildHolidayMaps();
+          updateYearDropdown();
+          renderYearPills();
+          setupEmployeeSelectors();
+          updateYearPillsUI();
+          updateEmployeePillsUI();
+          updateMonthPillsUI();
+          updateStatusPillsUI();
+          renderGymHolidaysListUI();
+          renderAll();
+
+          dom.headerRecordsCount.textContent = `${state.records.length.toLocaleString()} รายการ`;
+          dom.headerEmpCountBadge.textContent = `👥 พนักงาน ${state.employees.length} คน`;
+          dom.headerDateBadge.textContent = state.filterYear === 'ALL' ? '📅 ข้อมูลเวลาทุกปี' : `📅 ข้อมูลเวลาปี ${state.filterYear}`;
+
+          showToast(`📂 นำเข้าฐานข้อมูล SQLite สำเร็จ (${file.name})! พบข้อมูล ${state.records.length.toLocaleString()} รายการ`, 'success');
+        } catch (err) {
+          console.error("Import SQLite error:", err);
+          alert("ไม่สามารถนำเข้าฐานข้อมูล SQLite ได้: " + err.message);
+        }
+      }
+
+      // Initialize SQLite database
+      const dbInitialized = await initSQLiteDatabase();
+      if (!dbInitialized) {
+        console.error("SQLite initialization failed");
       }
 
       const savedFilters = loadSavedFilters();
 
-      // Application State
+      // Application State (Completely backed by SQLite 3)
       const state = {
-        employees: window.ATTENDANCE_DATA.employees || [],
-        records: [...window.ATTENDANCE_DATA.records || []],
+        employees: loadEmployeesFromSQLite(),
+        records: loadRecordsFromSQLite(),
         
-        // Persistent database configurations
-        employeeDayOffs: loadEmployeeDayOffs(),
-        gymHolidays: loadGymHolidays(),
-        leaveReasons: loadLeaveReasons(),
+        // Persistent database configurations from SQLite
+        employeeDayOffs: loadEmployeeDayOffsFromSQLite(),
+        gymHolidays: loadGymHolidaysFromSQLite(),
+        leaveReasons: loadLeaveReasonsFromSQLite(),
 
-        // Filters (Restored from LocalStorage; defaults to current year)
+        // Filters (Restored from SQLite; defaults to current year)
         filterEmployee: savedFilters?.filterEmployee !== undefined ? savedFilters.filterEmployee : 'ALL',
         filterYear: (savedFilters?.filterYear && savedFilters.filterYear !== 'ALL') ? savedFilters.filterYear : (new Date().getFullYear().toString()),
         filterMonth: savedFilters?.filterMonth !== undefined ? savedFilters.filterMonth : 'ALL',
-        filterStatus: savedFilters?.filterStatus !== undefined ? savedFilters.filterStatus : 'ALL', // 'ALL', 'normal', 'single_punch', 'leave', 'holiday'
+        filterStatus: savedFilters?.filterStatus !== undefined ? savedFilters.filterStatus : 'ALL',
         filterSearch: savedFilters?.filterSearch || '',
 
         // View
-        activeView: savedFilters?.activeView || 'summary', // 'summary', 'table', 'calendar'
+        activeView: savedFilters?.activeView || 'summary',
 
         // Table Pagination
         currentPage: 1,
         pageSize: savedFilters?.pageSize ? parseInt(savedFilters.pageSize, 10) : 50,
 
-        // Theme
-        theme: localStorage.getItem('app_theme') || 'light'
+        // Theme from SQLite
+        theme: loadAppSettingFromSQLite('app_theme', 'light')
       };
 
       // Ensure Thiti is excluded permanently even if imported
@@ -2911,6 +3706,10 @@
         headerDateBadge: document.getElementById('header-date-badge'),
         headerEmpCountBadge: document.getElementById('header-emp-count-badge'),
         headerRecordsCount: document.getElementById('header-records-count'),
+        headerSqliteBadge: document.getElementById('header-sqlite-badge'),
+        btnExportSqlite: document.getElementById('btn-export-sqlite'),
+        btnImportSqlite: document.getElementById('btn-import-sqlite'),
+        sqliteFileInput: document.getElementById('sqlite-file-input'),
         toastContainer: document.getElementById('toast-container'),
 
         // Actions
@@ -2918,11 +3717,11 @@
         btnPrint: document.getElementById('btn-print')
       };
 
-      // Theme Initialization
+      // Theme Initialization (SQLite backed)
       function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
-        dom.themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
-        localStorage.setItem('app_theme', theme);
+        if (dom.themeToggle) dom.themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        saveAppSettingToSQLite('app_theme', theme);
       }
       applyTheme(state.theme);
 
@@ -3569,38 +4368,50 @@
           let statusClass = 'is-leave';
           if (evalRes.status === 'normal') statusClass = 'is-normal';
           else if (evalRes.status === 'single_punch') statusClass = 'is-single';
-          else if (evalRes.status === 'holiday') statusClass = 'is-holiday';
+          else if (evalRes.status === 'holiday') {
+            const isGym = evalRes.holidayName && (evalRes.holidayName.includes('ยิม') || gymHolidayMap.has(rec.isoDate));
+            statusClass = isGym ? 'is-holiday is-gym-holiday' : 'is-holiday';
+          }
           else if (evalRes.status === 'leave') {
             if (evalRes.leaveType === 'sick') statusClass = 'is-leave is-sick';
             else if (evalRes.leaveType === 'vacation') statusClass = 'is-leave is-vacation';
             else if (evalRes.leaveType === 'business') statusClass = 'is-leave is-business';
+            else if (evalRes.leaveType === 'maternity') statusClass = 'is-leave is-maternity';
             else statusClass = 'is-leave';
           }
 
           cell.classList.add(...statusClass.split(' '));
 
           let badgeLabel = 'หยุด';
-          if (evalRes.status === 'normal') badgeLabel = 'มาปกติ';
-          else if (evalRes.status === 'single_punch') badgeLabel = 'ลืมสแกน';
-          else if (evalRes.status === 'holiday') badgeLabel = 'หยุด';
-          else if (evalRes.status === 'leave') {
-            if (evalRes.leaveType === 'sick') badgeLabel = '🩺 ลาป่วย';
-            else if (evalRes.leaveType === 'vacation') badgeLabel = '🏖️ พักร้อน';
-            else if (evalRes.leaveType === 'business') badgeLabel = '📋 ลากิจ';
-            else if (evalRes.leaveType === 'maternity') badgeLabel = '👶 ลาคลอด';
-            else if (evalRes.leaveType === 'other') badgeLabel = '📝 อื่นๆ';
-            else badgeLabel = '🔴 ลา';
+          let badgeClass = evalRes.badgeClass;
+          if (evalRes.status === 'normal') {
+            badgeLabel = 'มาปกติ';
+            badgeClass = 'badge-success';
+          } else if (evalRes.status === 'single_punch') {
+            badgeLabel = 'ลืมสแกน';
+            badgeClass = 'badge-warning';
+          } else if (evalRes.status === 'holiday') {
+            const isGym = evalRes.holidayName && (evalRes.holidayName.includes('ยิม') || gymHolidayMap.has(rec.isoDate));
+            badgeLabel = isGym ? '🏋️ ยิมปิด' : '🏖️ วันหยุด';
+            badgeClass = isGym ? 'badge-gym-holiday' : 'badge-holiday';
+          } else if (evalRes.status === 'leave') {
+            if (evalRes.leaveType === 'sick') { badgeLabel = '🩺 ลาป่วย'; badgeClass = 'badge-sick'; }
+            else if (evalRes.leaveType === 'vacation') { badgeLabel = '🏖️ พักร้อน'; badgeClass = 'badge-vacation'; }
+            else if (evalRes.leaveType === 'business') { badgeLabel = '📋 ลากิจ'; badgeClass = 'badge-business'; }
+            else if (evalRes.leaveType === 'maternity') { badgeLabel = '👶 ลาคลอด'; badgeClass = 'badge-maternity'; }
+            else if (evalRes.leaveType === 'other') { badgeLabel = '📝 อื่นๆ'; badgeClass = 'badge-other'; }
+            else { badgeLabel = '🔴 ขาดงาน'; badgeClass = 'badge-danger'; }
           }
 
           cell.innerHTML = `
             <div class="cell-top">
               <span class="cell-date-num">${day}</span>
-              <span class="cell-badge ${evalRes.badgeClass}">${badgeLabel}</span>
+              <span class="cell-badge ${badgeClass}">${badgeLabel}</span>
             </div>
             <div class="cell-body">
               ${rec.checkIn ? `<div class="cell-time-line"><span>เข้า:</span> <strong>${rec.checkIn}</strong></div>` : ''}
               ${rec.checkOut ? `<div class="cell-time-line"><span>ออก:</span> <strong>${rec.checkOut}</strong></div>` : ''}
-              ${!rec.checkIn && !rec.checkOut ? `<div class="cell-body-empty" style="color:var(--text-light); font-size:0.7rem; line-height:1.2;">${evalRes.label || evalRes.holidayName || 'ไม่มีการสแกน'}</div>` : ''}
+              ${!rec.checkIn && !rec.checkOut ? `<div class="cell-body-empty">${evalRes.label || evalRes.holidayName || 'ไม่มีการสแกน'}</div>` : ''}
             </div>
           `;
 
@@ -5070,6 +5881,9 @@
           state.employees = Array.from(empMap.values());
         }
 
+        // Save imported data directly into SQLite 3 database
+        saveImportedDataToSQLite(validRecords, validEmployees, mode);
+
         // Rebuild Color Map for newly imported employees
         state.employees.forEach((emp, i) => {
           if (!employeeColorMap[emp.id]) {
@@ -5101,30 +5915,35 @@
 
         const excludedCount = excludedIds.size;
         const excludedMsg = excludedCount > 0 ? ` (ตัดพนักงานออก ${excludedCount} คน)` : '';
-        showToast(`🎉 นำเข้าข้อมูลสำเร็จ ${validRecords.length.toLocaleString()} วัน / พนักงาน ${validEmployees.length} คน (${mode === 'replace' ? 'แทนที่เดิม' : 'รวมข้อมูล'}${excludedMsg})`, 'success');
+        showToast(`🎉 นำเข้าข้อมูลลง SQLite สำเร็จ ${validRecords.length.toLocaleString()} วัน / พนักงาน ${validEmployees.length} คน (${mode === 'replace' ? 'แทนที่เดิม' : 'รวมข้อมูล'}${excludedMsg})`, 'success');
       });
 
-      // Reset to Default Initial Data
+      // SQLite Import / Export Wire-up
+      if (dom.btnExportSqlite) {
+        dom.btnExportSqlite.addEventListener('click', () => {
+          exportSQLiteDatabaseFile();
+        });
+      }
+
+      if (dom.btnImportSqlite && dom.sqliteFileInput) {
+        dom.btnImportSqlite.addEventListener('click', () => {
+          dom.sqliteFileInput.click();
+        });
+
+        dom.sqliteFileInput.addEventListener('change', async (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          await importSQLiteDatabaseFile(file);
+          dom.sqliteFileInput.value = '';
+        });
+      }
+
+      // Reset to Default Initial SQLite Data
       if (dom.btnResetDefaultData) {
-        dom.btnResetDefaultData.addEventListener('click', () => {
-          if (confirm('คุณต้องการรีเซ็ตข้อมูลกลับเป็นข้อมูลเริ่มต้นเดิม (ปี 2022 - 2026) หรือไม่?')) {
-            state.records = JSON.parse(JSON.stringify(defaultState.records));
-            state.employees = JSON.parse(JSON.stringify(defaultState.employees));
-            state.filterYear = new Date().getFullYear().toString();
-            saveFilterState();
-            updateYearDropdown();
-            renderYearPills();
-            setupEmployeeSelectors();
-            state.filterEmployee = 'ALL';
-            state.currentPage = 1;
-            renderAll();
-
-            dom.headerRecordsCount.textContent = `${state.records.length.toLocaleString()} รายการ`;
-            dom.headerEmpCountBadge.textContent = `👥 พนักงาน ${state.employees.length} คน`;
-            dom.headerDateBadge.textContent = `📅 ข้อมูลเวลาปี ${state.filterYear}`;
-            dom.btnResetDefaultData.style.display = 'none';
-
-            showToast('🔄 คืนค่าข้อมูลเริ่มต้นเดิมเรียบร้อยแล้ว', 'warning');
+        dom.btnResetDefaultData.addEventListener('click', async () => {
+          if (confirm('คุณต้องการรีเซ็ตข้อมูลกลับเป็นข้อมูลเริ่มต้นเดิมจาก SQLite (ปี 2022 - 2026) หรือไม่? ข้อมูลการแก้ไขและการนำเข้าจะถูกคืนค่า')) {
+            await IDB_STORE.delete('active_attendance_sqlite_db');
+            window.location.reload();
           }
         });
       }
