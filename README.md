@@ -54,10 +54,19 @@ python generate_cleaned_data.py
   - ระบบจะตรวจหา Python หากมีจะเปิดผ่าน Local Server (`http://localhost:8000`) ให้อัตโนมัติ
   - หรือสามารถดับเบิลคลิกเปิด `index.html` ตรงๆ ผ่านเว็บเบราว์เซอร์ได้เช่นกัน
 
-## 🚀 การ Deploy บน Vercel
+## ☁️ ระบบ Turso Cloud SQLite (ซิงค์ข้อมูล Real-time ข้ามอุปกรณ์)
 
-โปรเจกต์นี้รองรับ Static Deployment บน Vercel ได้ทันที:
-1. นำเข้า Repository ใน Vercel Dashboard
-2. Framework Preset: **Other**
-3. Root Directory: `./`
-4. กด **Deploy** พร้อมใช้งานทันที
+ระบบรองรับการเชื่อมต่อ **Turso (Serverless SQLite)** บน Vercel:
+- **ซิงค์ข้อมูล Real-time**: เมื่อเพิ่ม/ลบวันหยุดยิม, วันลา, หรือกำหนดวันหยุดประจำตัว ข้อมูลจะถูกบันทึกขึ้น Turso Cloud อัตโนมัติ ทำให้คอมพิวเตอร์เครื่องอื่น มือถือ หรือแท็บเล็ตเปิดเข้ามาแล้วเห็นข้อมูลตรงกันทันที
+- **โหมด Hybrid ปลอดภัย**: 
+  - หากออนไลน์บน Vercel: เชื่อมต่อ Turso Cloud อัตโนมัติ (แสดงป้าย `☁️ Turso Cloud (Active)`)
+  - หากเปิดแบบออฟไลน์/ในเครื่อง: สลับไปใช้ WebAssembly SQLite ภายในเครื่องอัตโนมัติ โดยไม่สะดุด
+- **ปุ่มซิงค์ด่วน**: มีปุ่ม `🔄 ซิงค์จากเซิร์ฟเวอร์` บนแถบเมนูเพื่อดึงข้อมูลล่าสุดได้ตลอดเวลา
+
+## 🚀 การ Deploy บน Vercel & เชื่อมต่อ Turso
+
+1. นำเข้า Repository [github.com/gio1994rust-tech/att](https://github.com/gio1994rust-tech/att) ใน Vercel Dashboard
+2. ในแถบ **Storage** ของ Vercel: เลือก **Turso (Serverless SQLite)** แล้วกด Connect
+3. Vercel จะผูก `TURSO_DATABASE_URL` และ `TURSO_AUTH_TOKEN` เข้ากับ Serverless API (`/api/db`) อัตโนมัติ
+4. ทุกเครื่องที่เข้าใช้งานจะซิงค์ข้อมูลวันหยุดและวันลาตรงกันทันทีแบบ Real-time
+
