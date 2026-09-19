@@ -8,8 +8,20 @@ env/
 venv/
 .venv/
 
+# Dependencies
+node_modules/
+
+# Environment Variables
+.env
+.env*.local
+
+# Scratch/Dumps
+dump.sql
+initial_cloud_seed.json
+
 # OS / Editor files
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+

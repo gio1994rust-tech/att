@@ -2410,6 +2410,9 @@
         <button class="btn" id="btn-import-sqlite" title="นำเข้าฐานข้อมูล SQLite (.db, .sqlite)" style="border-color:#0284c7; color:#0284c7; font-weight:600;">
           📂 นำเข้า .db
         </button>
+        <button class="btn" id="btn-sync-server" title="ดึงฐานข้อมูลล่าสุดจากเซิร์ฟเวอร์ (Vercel) เผื่อกรณีเครื่องอื่นเพิ่งอัปเดตข้อมูลมา" style="border-color:#10b981; color:#10b981; font-weight:600;">
+          🔄 ซิงค์จากเซิร์ฟเวอร์
+        </button>
         <input type="file" id="sqlite-file-input" accept=".db,.sqlite,.sqlite3" style="display:none;">
 
         <!-- Import Data Trigger (เด่นชัด) -->
@@ -3268,6 +3271,112 @@
         }
       }
 
+      // Turso Cloud Sync Helper (Zero-latency local first + background cloud persistence)
+      async function syncToTursoCloud(payload) {
+        if (window.location.protocol === 'file:') return;
+        try {
+          fetch('/api/db', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }).catch(err => console.warn("Turso sync background error:", err));
+        } catch (e) {
+          console.warn("Turso sync call error:", e);
+        }
+      }
+
+      async function syncFromTursoCloud() {
+        if (window.location.protocol === 'file:') return false;
+        try {
+          const res = await fetch('/api/db');
+          if (!res.ok) return false;
+          const json = await res.json();
+          if (json.ok && json.turso && json.data) {
+            console.log("☁️ Turso Cloud connected! Updating data...");
+            const cloud = json.data;
+
+            // Update gym holidays
+            if (cloud.gym_holidays && Array.isArray(cloud.gym_holidays)) {
+              state.gymHolidays = cloud.gym_holidays;
+              if (db) {
+                try {
+                  db.run("BEGIN TRANSACTION;");
+                  db.run("DELETE FROM gym_holidays;");
+                  const stmt = db.prepare("INSERT INTO gym_holidays (holiday_date, holiday_name) VALUES (?, ?);");
+                  for (const gh of state.gymHolidays) {
+                    stmt.run([gh.date, gh.name]);
+                  }
+                  stmt.free();
+                  db.run("COMMIT;");
+                } catch (_) {}
+              }
+            }
+
+            // Update leave reasons
+            if (cloud.leave_reasons && Array.isArray(cloud.leave_reasons)) {
+              if (db) {
+                try {
+                  db.run("BEGIN TRANSACTION;");
+                  db.run("DELETE FROM leave_reasons;");
+                  const stmt = db.prepare("INSERT INTO leave_reasons (emp_id, iso_date, leave_type, leave_label, note, updated_at) VALUES (?, ?, ?, ?, ?, ?);");
+                  cloud.leave_reasons.forEach(l => {
+                    const key = `${l.emp_id}_${l.iso_date}`;
+                    state.leaveReasons[key] = {
+                      type: l.leave_type,
+                      label: l.leave_label,
+                      note: l.note,
+                      updatedAt: l.updated_at
+                    };
+                    stmt.run([l.emp_id, l.iso_date, l.leave_type || '', l.leave_label || '', l.note || '', l.updated_at || '']);
+                  });
+                  stmt.free();
+                  db.run("COMMIT;");
+                } catch (_) {}
+              }
+            }
+
+            // Update employee dayoffs
+            if (cloud.employee_dayoffs && typeof cloud.employee_dayoffs === 'object') {
+              state.employeeDayOffs = { ...state.employeeDayOffs, ...cloud.employee_dayoffs };
+              if (db) {
+                try {
+                  db.run("BEGIN TRANSACTION;");
+                  db.run("DELETE FROM employee_dayoffs;");
+                  const stmt = db.prepare("INSERT INTO employee_dayoffs (emp_id, day_of_week) VALUES (?, ?);");
+                  for (const empId in state.employeeDayOffs) {
+                    const days = state.employeeDayOffs[empId] || [];
+                    for (const d of days) {
+                      stmt.run([empId, d]);
+                    }
+                  }
+                  stmt.free();
+                  db.run("COMMIT;");
+                } catch (_) {}
+              }
+            }
+
+            persistDatabase();
+
+            // Update UI badge
+            const badge = document.getElementById('header-sqlite-badge');
+            if (badge) {
+              badge.textContent = '☁️ Turso Cloud (Active)';
+              badge.title = 'เชื่อมต่อฐานข้อมูล Turso Serverless SQLite สำเร็จ ซิงค์ข้อมูลตรงกันทุกเครื่อง Real-time';
+              badge.style.background = 'linear-gradient(135deg, #065f46, #047857)';
+              badge.style.borderColor = '#10b981';
+            }
+
+            rebuildHolidayMaps();
+            if (typeof renderGymHolidaysListUI === 'function') renderGymHolidaysListUI();
+            if (typeof renderAll === 'function') renderAll();
+            return true;
+          }
+        } catch (e) {
+          console.warn("syncFromTursoCloud warning:", e);
+        }
+        return false;
+      }
+
       function loadEmployeeDayOffsFromSQLite() {
         const dayoffs = {};
         if (!db) return { ...DEFAULT_STAFF_DAYOFFS };
@@ -3299,6 +3408,7 @@
             for (const d of days) {
               stmt.run([empId, d]);
             }
+            syncToTursoCloud({ action: 'save_employee_dayoffs', emp_id: empId, days });
           }
           stmt.free();
           db.run("COMMIT;");
@@ -3333,6 +3443,7 @@
           const stmt = db.prepare("INSERT INTO gym_holidays (holiday_date, holiday_name) VALUES (?, ?);");
           for (const gh of (state.gymHolidays || [])) {
             stmt.run([gh.date, gh.name]);
+            syncToTursoCloud({ action: 'save_gym_holiday', date: gh.date, name: gh.name });
           }
           stmt.free();
           db.run("COMMIT;");
@@ -3380,6 +3491,15 @@
             const item = state.leaveReasons[key];
             if (item && empId && isoDate) {
               stmt.run([empId, isoDate, item.type || '', item.label || '', item.note || '', item.updatedAt || '']);
+              syncToTursoCloud({
+                action: 'save_leave_reason',
+                emp_id: empId,
+                iso_date: isoDate,
+                leave_type: item.type || '',
+                leave_label: item.label || '',
+                note: item.note || '',
+                updated_at: item.updatedAt || ''
+              });
             }
           }
           stmt.free();
@@ -3709,6 +3829,7 @@
         headerSqliteBadge: document.getElementById('header-sqlite-badge'),
         btnExportSqlite: document.getElementById('btn-export-sqlite'),
         btnImportSqlite: document.getElementById('btn-import-sqlite'),
+        btnSyncServer: document.getElementById('btn-sync-server'),
         sqliteFileInput: document.getElementById('sqlite-file-input'),
         toastContainer: document.getElementById('toast-container'),
 
@@ -5938,6 +6059,19 @@
         });
       }
 
+      // Sync from Turso Server Wire-up
+      if (dom.btnSyncServer) {
+        dom.btnSyncServer.addEventListener('click', async () => {
+          showToast('🔄 กำลังเชื่อมต่อซิงค์ข้อมูลกับ Turso Cloud...', 'info');
+          const synced = await syncFromTursoCloud();
+          if (synced) {
+            showToast('✅ ซิงค์ข้อมูลล่าสุดจาก Turso Cloud สำเร็จ!', 'success');
+          } else {
+            showToast('ℹ️ ใช้งานโหมดออฟไลน์ หรือยังไม่ได้ตั้งค่า Turso บนเซิร์ฟเวอร์', 'info');
+          }
+        });
+      }
+
       // Reset to Default Initial SQLite Data
       if (dom.btnResetDefaultData) {
         dom.btnResetDefaultData.addEventListener('click', async () => {
@@ -5978,6 +6112,9 @@
       }
 
       renderAll();
+
+      // Automatically sync latest cloud state from Turso in background
+      syncFromTursoCloud();
 
     })();
   </script>
