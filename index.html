@@ -3379,23 +3379,45 @@
         }
 
         let u8 = null;
-        // 1. Try to load saved binary from IndexedDB
+
+        // Auto Cache Invalidation via Version Tracking (User never needs to manually clear browser cache)
+        const APP_DATA_VERSION = 'v2026.10.08.pg_release_1';
+        let cachedVersion = null;
         try {
-          const saved = await IDB_STORE.get('active_attendance_sqlite_db');
-          if (saved && saved.byteLength > 0) {
-            u8 = new Uint8Array(saved);
+          cachedVersion = await IDB_STORE.get('app_db_version');
+        } catch (_) {}
+
+        if (cachedVersion !== APP_DATA_VERSION) {
+          console.log("🔄 New app/database version detected (" + APP_DATA_VERSION + "). Auto-clearing stale IndexedDB cache...");
+          try {
+            await IDB_STORE.delete('active_attendance_sqlite_db');
+            await IDB_STORE.set('app_db_version', APP_DATA_VERSION);
+          } catch (_) {}
+        } else {
+          // 1. Try to load saved binary from IndexedDB only if version matches
+          try {
+            const saved = await IDB_STORE.get('active_attendance_sqlite_db');
+            if (saved && saved.byteLength > 0) {
+              u8 = new Uint8Array(saved);
+            }
+          } catch (e) {
+            console.warn("IndexedDB load error:", e);
           }
-        } catch (e) {
-          console.warn("IndexedDB load error:", e);
         }
 
-        // 2. If not in IndexedDB and on HTTP / Vercel, fetch attendance.db
+        // 2. If not in IndexedDB and on HTTP / Vercel, fetch attendance.db with cache busting
         if (!u8 && window.location.protocol !== 'file:') {
           try {
-            const resp = await fetch('attendance.db');
+            const resp = await fetch(`attendance.db?v=${APP_DATA_VERSION}&t=${Date.now()}`, {
+              cache: 'no-store'
+            });
             if (resp.ok) {
               const buf = await resp.arrayBuffer();
               u8 = new Uint8Array(buf);
+              try {
+                await IDB_STORE.set('active_attendance_sqlite_db', u8);
+                await IDB_STORE.set('app_db_version', APP_DATA_VERSION);
+              } catch (_) {}
             }
           } catch (e) {
             console.warn("fetch attendance.db failed:", e);
@@ -3562,10 +3584,12 @@
       async function syncFromTursoCloud() {
         if (window.location.protocol === 'file:') return false;
         try {
-          const res = await fetch('/api/db');
+          const res = await fetch(`/api/db?t=${Date.now()}`, {
+            headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+          });
           if (!res.ok) return false;
           const json = await res.json();
-          if (json.ok && (json.postgres || json.turso) && json.data) {
+          if (json.ok && (json.postgres || json.turso || json.data) && json.data) {
             console.log("🐘 PostgreSQL / Cloud connected! Updating data...");
             const cloud = json.data;
 
@@ -6417,10 +6441,13 @@
       // Sync from Server Wire-up (PostgreSQL / Cloud DB)
       if (dom.btnSyncServer) {
         dom.btnSyncServer.addEventListener('click', async () => {
-          showToast('🔄 กำลังเชื่อมต่อซิงค์ข้อมูลกับ PostgreSQL...', 'info');
+          showToast('🔄 กำลังเชื่อมต่อซิงค์ข้อมูลกับ PostgreSQL และรีเฟรชระบบ...', 'info');
+          try {
+            await IDB_STORE.delete('active_attendance_sqlite_db');
+          } catch (_) {}
           const synced = await syncFromTursoCloud();
           if (synced) {
-            showToast('✅ ซิงค์ข้อมูลล่าสุดจาก PostgreSQL สำเร็จ!', 'success');
+            showToast('✅ ซิงค์ข้อมูลล่าสุดจาก PostgreSQL สำเร็จ! ข้อมูลวันลาและวันหยุดเป็นปัจจุบันแล้ว', 'success');
           } else {
             showToast('ℹ️ ใช้งานโหมดออฟไลน์ หรือยังไม่ได้ตั้งค่า POSTGRES_URL บนเซิร์ฟเวอร์', 'info');
           }
@@ -6466,10 +6493,12 @@
           : `📅 ข้อมูลเวลาปี ${state.filterYear}`;
       }
 
-      renderAll();
+      // Automatically sync latest cloud state from PostgreSQL before initial render
+      try {
+        await syncFromTursoCloud();
+      } catch (_) {}
 
-      // Automatically sync latest cloud state from Turso in background
-      syncFromTursoCloud();
+      renderAll();
 
     })();
   </script>
