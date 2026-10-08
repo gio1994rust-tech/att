@@ -202,12 +202,10 @@ export default async function handler(req, res) {
     await ensureTables(client);
 
     if (req.method === 'GET') {
-      const [holidaysRes, leaveRes, dayoffsRes, settingsRes] = await Promise.all([
-        client.query("SELECT holiday_date, holiday_name FROM gym_holidays ORDER BY holiday_date ASC;"),
-        client.query("SELECT emp_id, iso_date, leave_type, leave_label, note, updated_at FROM leave_reasons ORDER BY iso_date ASC;"),
-        client.query("SELECT emp_id, day_of_week FROM employee_dayoffs ORDER BY emp_id, day_of_week ASC;"),
-        client.query("SELECT key, value FROM app_settings;")
-      ]);
+      const holidaysRes = await client.query("SELECT holiday_date, holiday_name FROM gym_holidays ORDER BY holiday_date ASC;");
+      const leaveRes = await client.query("SELECT emp_id, iso_date, leave_type, leave_label, note, updated_at FROM leave_reasons ORDER BY iso_date ASC;");
+      const dayoffsRes = await client.query("SELECT emp_id, day_of_week FROM employee_dayoffs ORDER BY emp_id, day_of_week ASC;");
+      const settingsRes = await client.query("SELECT key, value FROM app_settings;");
 
       const gymHolidays = holidaysRes.rows.map(r => ({
         date: r.holiday_date,
@@ -318,10 +316,15 @@ export default async function handler(req, res) {
       }
 
       if (action === 'save_imported_records') {
-        const { employees, records } = body;
+        const { employees, records, mode } = body;
         await client.query("BEGIN;");
         try {
-          if (Array.isArray(employees)) {
+          if (mode === 'replace') {
+            await client.query("DELETE FROM attendance_records;");
+            await client.query("DELETE FROM employees;");
+          }
+
+          if (Array.isArray(employees) && employees.length > 0) {
             for (const emp of employees) {
               await client.query(
                 "INSERT INTO employees (id, name, card_id) VALUES ($1, $2, $3) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, card_id = EXCLUDED.card_id;",
@@ -329,13 +332,41 @@ export default async function handler(req, res) {
               );
             }
           }
-          if (Array.isArray(records)) {
-            for (const r of records) {
+
+          if (Array.isArray(records) && records.length > 0) {
+            const CHUNK_SIZE = 100;
+            for (let i = 0; i < records.length; i += CHUNK_SIZE) {
+              const chunk = records.slice(i, i + CHUNK_SIZE);
+              const valueRows = [];
+              const params = [];
+              chunk.forEach((r, idx) => {
+                const base = idx * 16;
+                valueRows.push(`($${base+1}, $${base+2}, $${base+3}, $${base+4}, $${base+5}, $${base+6}, $${base+7}, $${base+8}, $${base+9}, $${base+10}, $${base+11}, $${base+12}, $${base+13}, $${base+14}, $${base+15}, $${base+16})`);
+                params.push(
+                  r.empId,
+                  r.cardId || '',
+                  r.empName,
+                  r.date,
+                  r.isoDate,
+                  r.year,
+                  r.month,
+                  r.day,
+                  r.dayOfWeek,
+                  r.count || 0,
+                  JSON.stringify(r.punches || []),
+                  r.checkIn || '',
+                  r.checkOut || '',
+                  r.workHours !== undefined ? r.workHours : null,
+                  r.workHoursFormatted || '',
+                  r.initialStatus || (r.count >= 2 ? 'normal' : (r.count === 1 ? 'single_punch' : 'absent'))
+                );
+              });
+
               await client.query(`
                 INSERT INTO attendance_records (
                   emp_id, card_id, emp_name, date, iso_date, year, month, day, day_of_week,
                   count, punches, check_in, check_out, work_hours, work_hours_formatted, initial_status
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+                ) VALUES ${valueRows.join(', ')}
                 ON CONFLICT (emp_id, iso_date)
                 DO UPDATE SET
                   count = EXCLUDED.count,
@@ -345,24 +376,7 @@ export default async function handler(req, res) {
                   work_hours = EXCLUDED.work_hours,
                   work_hours_formatted = EXCLUDED.work_hours_formatted,
                   initial_status = EXCLUDED.initial_status;
-              `, [
-                r.empId,
-                r.cardId || '',
-                r.empName,
-                r.date,
-                r.isoDate,
-                r.year,
-                r.month,
-                r.day,
-                r.dayOfWeek,
-                r.count || 0,
-                JSON.stringify(r.punches || []),
-                r.checkIn || '',
-                r.checkOut || '',
-                r.workHours !== undefined ? r.workHours : null,
-                r.workHoursFormatted || '',
-                r.initialStatus || 'absent'
-              ]);
+              `, params);
             }
           }
           await client.query("COMMIT;");

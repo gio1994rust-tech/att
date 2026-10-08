@@ -3912,7 +3912,7 @@
               r.checkOut || '',
               r.workHours !== undefined ? r.workHours : null,
               r.workHoursFormatted || '',
-              r.initialStatus || 'absent'
+              r.initialStatus || (r.count >= 2 ? 'normal' : (r.count === 1 ? 'single_punch' : 'absent'))
             ]);
           }
           recStmt.free();
@@ -3924,6 +3924,7 @@
           // Sync imported records to PostgreSQL Cloud in background
           syncToTursoCloud({
             action: 'save_imported_records',
+            mode: mode,
             employees: validEmployees,
             records: validRecords
           });
@@ -5863,6 +5864,87 @@
         '10006': 'ประวิทย์ ยาเพ็ชร'
       };
 
+      // Helper function to safely parse dates from multiple Excel and text formats
+      function parseImportDate(rawVal) {
+        if (!rawVal) return null;
+        if (rawVal instanceof Date && !isNaN(rawVal)) {
+          const y = rawVal.getFullYear();
+          const m = rawVal.getMonth() + 1;
+          const d = rawVal.getDate();
+          return {
+            year: y,
+            month: m,
+            day: d,
+            dateStr: `${d.toString().padStart(2, '0')}/${m.toString().padStart(2, '0')}/${y}`,
+            isoDate: `${y}-${m.toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`
+          };
+        }
+        if (typeof rawVal === 'number' || (!isNaN(rawVal) && !String(rawVal).includes('/') && !String(rawVal).includes('-'))) {
+          const num = Number(rawVal);
+          if (num > 30000 && num < 60000) {
+            // Excel numeric serial date (days since 1899-12-30)
+            const jsDate = new Date(Math.round((num - 25569) * 86400 * 1000));
+            const y = jsDate.getUTCFullYear();
+            const m = jsDate.getUTCMonth() + 1;
+            const d = jsDate.getUTCDate();
+            return {
+              year: y,
+              month: m,
+              day: d,
+              dateStr: `${d.toString().padStart(2, '0')}/${m.toString().padStart(2, '0')}/${y}`,
+              isoDate: `${y}-${m.toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`
+            };
+          }
+        }
+        const str = String(rawVal).trim();
+        if (str.includes('/')) {
+          const parts = str.split('/');
+          if (parts.length === 3) {
+            const d = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10);
+            let y = parseInt(parts[2], 10);
+            if (y > 2500) y -= 543; // Thai BE to CE
+            if (y < 100) y += 2000;
+            if (d >= 1 && d <= 31 && m >= 1 && m <= 12 && y >= 1970) {
+              return {
+                year: y,
+                month: m,
+                day: d,
+                dateStr: `${d.toString().padStart(2, '0')}/${m.toString().padStart(2, '0')}/${y}`,
+                isoDate: `${y}-${m.toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`
+              };
+            }
+          }
+        }
+        if (str.includes('-')) {
+          const parts = str.split('-');
+          if (parts.length === 3) {
+            let y, m, d;
+            if (parts[0].length === 4) {
+              y = parseInt(parts[0], 10);
+              m = parseInt(parts[1], 10);
+              d = parseInt(parts[2], 10);
+            } else {
+              d = parseInt(parts[0], 10);
+              m = parseInt(parts[1], 10);
+              y = parseInt(parts[2], 10);
+            }
+            if (y > 2500) y -= 543;
+            if (y < 100) y += 2000;
+            if (d >= 1 && d <= 31 && m >= 1 && m <= 12 && y >= 1970) {
+              return {
+                year: y,
+                month: m,
+                day: d,
+                dateStr: `${d.toString().padStart(2, '0')}/${m.toString().padStart(2, '0')}/${y}`,
+                isoDate: `${y}-${m.toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`
+              };
+            }
+          }
+        }
+        return null;
+      }
+
       // Parse and analyze uploaded file (Supports both .dat/.txt and .xlsx/.xls/.csv)
       function parseImportFile(file) {
         const fileName = file.name.toLowerCase();
@@ -5880,6 +5962,8 @@
               const groupedPunches = new Map(); // key: "empId_YYYY-MM-DD"
               const empMap = {};
               const yearsSet = new Set();
+              let minIsoDate = null;
+              let maxIsoDate = null;
 
               lines.forEach(line => {
                 const trimmed = line.trim();
@@ -5892,6 +5976,8 @@
                   if (!dateStr || !dateStr.includes('-')) return;
 
                   totalLogs++;
+                  if (!minIsoDate || dateStr < minIsoDate) minIsoDate = dateStr;
+                  if (!maxIsoDate || dateStr > maxIsoDate) maxIsoDate = dateStr;
 
                   const empName = knownEmployeeNames[empId] || (state.employees.find(e => e.id === empId)?.name) || `พนักงาน ${empId}`;
                   if (!empMap[empId]) {
@@ -5922,61 +6008,97 @@
                 }
               });
 
-              if (groupedPunches.size === 0) {
+              if (groupedPunches.size === 0 || !minIsoDate || !maxIsoDate) {
                 alert('ไม่พบข้อมูลบันทึกเวลาที่ถูกต้องในไฟล์ .dat นี้');
                 return;
               }
 
+              // Generate full calendar records for every employee across the date range (minIsoDate .. maxIsoDate)
+              // Crucial: days without punches are generated as count=0 (absent/leave/holiday), preserving expected leaves!
+              const [sY, sM, sD] = minIsoDate.split('-').map(Number);
+              const [eY, eM, eD] = maxIsoDate.split('-').map(Number);
+              const currDate = new Date(sY, sM - 1, sD);
+              const endDate = new Date(eY, eM - 1, eD);
+
+              const empList = Object.values(empMap);
               const allRecords = [];
-              groupedPunches.forEach((group) => {
-                // Deduplicate & sort punch times chronologically
-                const sortedTimes = [...new Set(group.times)].sort();
 
-                const dParts = group.isoDate.split('-');
-                const year = parseInt(dParts[0], 10);
-                const month = parseInt(dParts[1], 10);
-                const day = parseInt(dParts[2], 10);
-                const dt = new Date(year, month - 1, day);
-                const dayOfWeek = (dt.getDay() + 6) % 7; // Mon=0..Sun=6
-                const dateTh = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
+              while (currDate <= endDate) {
+                const y = currDate.getFullYear();
+                const m = currDate.getMonth() + 1;
+                const d = currDate.getDate();
+                const isoDate = `${y}-${m.toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+                const dateTh = `${d.toString().padStart(2, '0')}/${m.toString().padStart(2, '0')}/${y}`;
+                const dayOfWeek = (currDate.getDay() + 6) % 7; // Mon=0..Sun=6
+                yearsSet.add(y.toString());
 
-                const checkIn = sortedTimes[0] || '';
-                const checkOut = sortedTimes.length > 1 ? sortedTimes[sortedTimes.length - 1] : '';
-                let workHours = null;
-                let workHoursFormatted = '';
+                empList.forEach(emp => {
+                  const key = `${emp.id}_${isoDate}`;
+                  const punchGroup = groupedPunches.get(key);
+                  if (punchGroup && punchGroup.times.length > 0) {
+                    const sortedTimes = [...new Set(punchGroup.times)].sort();
+                    const checkIn = sortedTimes[0] || '';
+                    const checkOut = sortedTimes.length > 1 ? sortedTimes[sortedTimes.length - 1] : '';
+                    let workHours = null;
+                    let workHoursFormatted = '';
 
-                if (checkIn && checkOut) {
-                  const tInParts = checkIn.split(':');
-                  const tOutParts = checkOut.split(':');
-                  if (tInParts.length === 2 && tOutParts.length === 2) {
-                    const mIn = parseInt(tInParts[0], 10) * 60 + parseInt(tInParts[1], 10);
-                    const mOut = parseInt(tOutParts[0], 10) * 60 + parseInt(tOutParts[1], 10);
-                    const diff = mOut - mIn;
-                    if (diff >= 0) {
-                      workHours = Math.round((diff / 60) * 100) / 100;
-                      workHoursFormatted = `${Math.floor(diff / 60)} ชม. ${diff % 60} น.`;
+                    if (checkIn && checkOut) {
+                      const tInParts = checkIn.split(':');
+                      const tOutParts = checkOut.split(':');
+                      if (tInParts.length === 2 && tOutParts.length === 2) {
+                        const mIn = parseInt(tInParts[0], 10) * 60 + parseInt(tInParts[1], 10);
+                        const mOut = parseInt(tOutParts[0], 10) * 60 + parseInt(tOutParts[1], 10);
+                        const diff = mOut - mIn;
+                        if (diff >= 0) {
+                          workHours = Math.round((diff / 60) * 100) / 100;
+                          workHoursFormatted = `${Math.floor(diff / 60)} ชม. ${diff % 60} น.`;
+                        }
+                      }
                     }
-                  }
-                }
 
-                allRecords.push({
-                  empId: group.empId,
-                  cardId: group.empId,
-                  empName: group.empName,
-                  date: dateTh,
-                  isoDate: group.isoDate,
-                  year: year,
-                  month: month,
-                  day: day,
-                  dayOfWeek: dayOfWeek,
-                  count: sortedTimes.length,
-                  punches: sortedTimes,
-                  checkIn: checkIn,
-                  checkOut: checkOut,
-                  workHours: workHours,
-                  workHoursFormatted: workHoursFormatted
+                    allRecords.push({
+                      empId: emp.id,
+                      cardId: emp.cardId || emp.id,
+                      empName: emp.name,
+                      date: dateTh,
+                      isoDate: isoDate,
+                      year: y,
+                      month: m,
+                      day: d,
+                      dayOfWeek: dayOfWeek,
+                      count: sortedTimes.length,
+                      punches: sortedTimes,
+                      checkIn: checkIn,
+                      checkOut: checkOut,
+                      workHours: workHours,
+                      workHoursFormatted: workHoursFormatted,
+                      initialStatus: sortedTimes.length >= 2 ? 'normal' : 'single_punch'
+                    });
+                  } else {
+                    // Non-punch day: Absent / Leave / Holiday
+                    allRecords.push({
+                      empId: emp.id,
+                      cardId: emp.cardId || emp.id,
+                      empName: emp.name,
+                      date: dateTh,
+                      isoDate: isoDate,
+                      year: y,
+                      month: m,
+                      day: d,
+                      dayOfWeek: dayOfWeek,
+                      count: 0,
+                      punches: [],
+                      checkIn: '',
+                      checkOut: '',
+                      workHours: null,
+                      workHoursFormatted: '',
+                      initialStatus: 'absent'
+                    });
+                  }
                 });
-              });
+
+                currDate.setDate(currDate.getDate() + 1);
+              }
 
               // Sort records by date descending
               allRecords.sort((a, b) => b.isoDate.localeCompare(a.isoDate));
@@ -6037,17 +6159,24 @@
               return;
             }
 
-            const allRecords = [];
+            const parsedRows = new Map(); // key: `${empId}_${isoDate}`
             const empMap = {};
             let totalDataRows = 0;
             const yearsSet = new Set();
+            let minIsoDate = null;
+            let maxIsoDate = null;
 
             jsonData.forEach((row, idx) => {
               if (idx === 0 || row['A'] === 'รหัสพนักงาน') return;
 
-              const empName = (row['C'] || '').toString().trim();
               const empId = (row['A'] || '').toString().trim();
               if (!empId) return;
+
+              const empName = (row['C'] || '').toString().trim() || knownEmployeeNames[empId] || (state.employees.find(e => e.id === empId)?.name) || `พนักงาน ${empId}`;
+              const cardId = (row['B'] || '').toString().trim() || empId;
+
+              const parsedDate = parseImportDate(row['D']);
+              if (!parsedDate) return;
 
               totalDataRows++;
 
@@ -6055,20 +6184,20 @@
                 empMap[empId] = {
                   id: empId,
                   name: empName,
-                  cardId: (row['B'] || '').toString().trim(),
+                  cardId: cardId,
                   totalRows: 0
                 };
               }
               empMap[empId].totalRows++;
 
-              const dateStr = (row['D'] || '').toString().trim();
-              const dParts = dateStr.split('/');
-              const day = parseInt(dParts[0], 10) || 1;
-              const month = parseInt(dParts[1], 10) || 1;
-              const year = parseInt(dParts[2], 10) || 2025;
+              const { year, month, day, dateStr, isoDate } = parsedDate;
               yearsSet.add(year.toString());
+
+              if (!minIsoDate || isoDate < minIsoDate) minIsoDate = isoDate;
+              if (!maxIsoDate || isoDate > maxIsoDate) maxIsoDate = isoDate;
+
               const dt = new Date(year, month - 1, day);
-              const dayOfWeek = (dt.getDay() + 6) % 7; // Convert Sun=0..Sat=6 to Mon=0..Sun=6
+              const dayOfWeek = (dt.getDay() + 6) % 7; // Mon=0..Sun=6
 
               const punches = [];
               ['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'].forEach(col => {
@@ -6095,12 +6224,12 @@
                 }
               }
 
-              allRecords.push({
+              parsedRows.set(`${empId}_${isoDate}`, {
                 empId: empId,
-                cardId: (row['B'] || '').toString().trim(),
+                cardId: cardId,
                 empName: empName,
                 date: dateStr,
-                isoDate: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`,
+                isoDate: isoDate,
                 year: year,
                 month: month,
                 day: day,
@@ -6110,14 +6239,64 @@
                 checkIn: checkIn,
                 checkOut: checkOut,
                 workHours: workHours,
-                workHoursFormatted: workHoursFormatted
+                workHoursFormatted: workHoursFormatted,
+                initialStatus: punches.length >= 2 ? 'normal' : (punches.length === 1 ? 'single_punch' : 'absent')
               });
             });
 
-            if (allRecords.length === 0) {
+            if (parsedRows.size === 0 || !minIsoDate || !maxIsoDate) {
               alert('ไม่พบข้อมูลพนักงานที่ถูกต้องในไฟล์ Excel');
               return;
             }
+
+            // Fill in any missing calendar dates between minIsoDate and maxIsoDate for all employees
+            const [sY, sM, sD] = minIsoDate.split('-').map(Number);
+            const [eY, eM, eD] = maxIsoDate.split('-').map(Number);
+            const currDate = new Date(sY, sM - 1, sD);
+            const endDate = new Date(eY, eM - 1, eD);
+
+            const empList = Object.values(empMap);
+            const allRecords = [];
+
+            while (currDate <= endDate) {
+              const y = currDate.getFullYear();
+              const m = currDate.getMonth() + 1;
+              const d = currDate.getDate();
+              const isoDate = `${y}-${m.toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+              const dateTh = `${d.toString().padStart(2, '0')}/${m.toString().padStart(2, '0')}/${y}`;
+              const dayOfWeek = (currDate.getDay() + 6) % 7;
+
+              empList.forEach(emp => {
+                const key = `${emp.id}_${isoDate}`;
+                if (parsedRows.has(key)) {
+                  allRecords.push(parsedRows.get(key));
+                } else {
+                  // Missing day in Excel file -> generate 0-count absent record
+                  allRecords.push({
+                    empId: emp.id,
+                    cardId: emp.cardId || emp.id,
+                    empName: emp.name,
+                    date: dateTh,
+                    isoDate: isoDate,
+                    year: y,
+                    month: m,
+                    day: d,
+                    dayOfWeek: dayOfWeek,
+                    count: 0,
+                    punches: [],
+                    checkIn: '',
+                    checkOut: '',
+                    workHours: null,
+                    workHoursFormatted: '',
+                    initialStatus: 'absent'
+                  });
+                }
+              });
+
+              currDate.setDate(currDate.getDate() + 1);
+            }
+
+            allRecords.sort((a, b) => b.isoDate.localeCompare(a.isoDate));
 
             const sortedYears = Array.from(yearsSet).sort();
 
@@ -6263,18 +6442,21 @@
         const excludedEmpsCount = excludedIds.size;
         const validEmpsCount = totalEmps - excludedEmpsCount;
 
+        const absentCount = validRecords.filter(r => r.count === 0).length;
+        const attendedCount = validRecords.length - absentCount;
+
         if (isDat) {
           dom.previewTotalRows.textContent = `${totalRaw.toLocaleString()} สแกน (${totalEmps} คน)`;
           dom.previewThitiRows.textContent = excludedEmpsCount > 0
             ? `${excludedRawCount.toLocaleString()} สแกน (${excludedEmpsCount} คน)`
             : '0 (ไม่มีตัดออก)';
-          dom.previewValidRows.textContent = `${validRecords.length.toLocaleString()} วัน (${validEmpsCount} คน)`;
+          dom.previewValidRows.textContent = `${validRecords.length.toLocaleString()} วัน (${attendedCount.toLocaleString()} วันมีสแกน, ${absentCount.toLocaleString()} วันขาด/ลา/หยุด)`;
         } else {
           dom.previewTotalRows.textContent = `${totalRaw.toLocaleString()} แถว (${totalEmps} คน)`;
           dom.previewThitiRows.textContent = excludedEmpsCount > 0
             ? `${excludedRawCount.toLocaleString()} แถว (${excludedEmpsCount} คน)`
             : '0 (ไม่มีตัดออก)';
-          dom.previewValidRows.textContent = `${validRecords.length.toLocaleString()} แถว (${validEmpsCount} คน)`;
+          dom.previewValidRows.textContent = `${validRecords.length.toLocaleString()} วัน (${attendedCount.toLocaleString()} วันมีสแกน, ${absentCount.toLocaleString()} วันขาด/ลา/หยุด)`;
         }
 
         const canImport = validRecords.length > 0 && validEmpsCount > 0;
@@ -6284,7 +6466,7 @@
         if (statusBadge) {
           if (canImport) {
             statusBadge.className = 'badge badge-success';
-            statusBadge.textContent = `พร้อมนำเข้า (${validEmpsCount} คน)`;
+            statusBadge.textContent = `พร้อมนำเข้า (${validEmpsCount} คน • ${validRecords.length.toLocaleString()} วัน)`;
           } else {
             statusBadge.className = 'badge badge-danger';
             statusBadge.textContent = 'ไม่มีพนักงานที่เลือกนำเข้า';
@@ -6364,13 +6546,13 @@
           state.records = validRecords;
           state.employees = validEmployees;
         } else {
-          // Merge mode: combine by key (empId + '_' + date)
+          // Merge mode: combine by key (empId + '_' + isoDate)
           const recordMap = new Map();
           state.records.forEach(r => {
-            recordMap.set(`${r.empId}_${r.date}`, r);
+            recordMap.set(`${r.empId}_${r.isoDate}`, r);
           });
           validRecords.forEach(r => {
-            recordMap.set(`${r.empId}_${r.date}`, r);
+            recordMap.set(`${r.empId}_${r.isoDate}`, r);
           });
           state.records = Array.from(recordMap.values());
 
@@ -6396,13 +6578,18 @@
           state.filterYear = pendingImportData.years[pendingImportData.years.length - 1]; // Latest year
         }
 
+        // Reset status & employee filters so all statuses (including absent & leaves) show immediately
+        state.filterStatus = 'ALL';
+        state.filterEmployee = 'ALL';
+        saveFilterState();
+        state.currentPage = 1;
+
         // Update UI
         updateYearDropdown();
         renderYearPills();
         setupEmployeeSelectors();
-        state.filterEmployee = 'ALL';
-        saveFilterState();
-        state.currentPage = 1;
+        updateStatusPillsUI();
+        updateEmployeePillsUI();
         renderAll();
 
         // Update Header badges
