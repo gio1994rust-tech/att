@@ -272,7 +272,30 @@ def process():
 
 def create_sqlite_db(known_employees, all_records):
     db_path = 'attendance.db'
+    saved_leaves = []
+    saved_gym_holidays = []
+    saved_dayoffs = []
+    saved_settings = []
+
     if os.path.exists(db_path):
+        try:
+            old_conn = sqlite3.connect(db_path)
+            old_c = old_conn.cursor()
+            try:
+                saved_leaves = old_c.execute("SELECT emp_id, iso_date, leave_type, leave_label, note, updated_at FROM leave_reasons").fetchall()
+            except Exception: pass
+            try:
+                saved_gym_holidays = old_c.execute("SELECT holiday_date, holiday_name FROM gym_holidays").fetchall()
+            except Exception: pass
+            try:
+                saved_dayoffs = old_c.execute("SELECT emp_id, day_of_week FROM employee_dayoffs").fetchall()
+            except Exception: pass
+            try:
+                saved_settings = old_c.execute("SELECT key, value FROM app_settings").fetchall()
+            except Exception: pass
+            old_conn.close()
+        except Exception as e:
+            print(f"Notice: Reading existing tables before recreate: {e}")
         try:
             os.remove(db_path)
         except Exception:
@@ -393,7 +416,7 @@ def create_sqlite_db(known_employees, all_records):
         ]
     )
 
-    # Default Empirical Day-Offs
+    # Day-Offs (Restore or defaults)
     default_dayoffs = [
         ('10001', 3), ('10001', 6), # Bumroongchat: Thu, Sun
         ('10002', 6),               # Weerayuth: Sun
@@ -401,9 +424,65 @@ def create_sqlite_db(known_employees, all_records):
         ('10005', 5), ('10005', 6), # Amnaj: Sat, Sun
         ('10006', 0), ('10006', 1), ('10006', 2), ('10006', 4), ('10006', 6) # ประวิทย์: Mon, Tue, Wed, Fri, Sun
     ]
-    cursor.executemany("INSERT INTO employee_dayoffs (emp_id, day_of_week) VALUES (?, ?);", default_dayoffs)
+    if saved_dayoffs and len(saved_dayoffs) > 0:
+        cursor.executemany("INSERT INTO employee_dayoffs (emp_id, day_of_week) VALUES (?, ?);", saved_dayoffs)
+    else:
+        cursor.executemany("INSERT INTO employee_dayoffs (emp_id, day_of_week) VALUES (?, ?);", default_dayoffs)
 
-    # Default App Settings (Theme, Saved Filters)
+    # Gym Holidays (Restore or defaults)
+    default_gym_holidays = [
+        ("2025-01-01", "ปีใหม่ 2025"), ("2025-04-14", "สงกรานต์ 2025"),
+        ("2025-04-15", "สงกรานต์ 2025"), ("2025-04-16", "สงกรานต์ 2025"),
+        ("2025-12-31", "ปีใหม่ 2026"), ("2026-01-01", "ปีใหม่ 2026"),
+        ("2026-01-02", "ปีใหม่ 2026"), ("2026-01-03", "ปีใหม่ 2026"),
+        ("2026-04-13", "สงกรานต์"), ("2026-04-14", "สงกรานต์"),
+        ("2026-04-15", "สงกรานต์"), ("2026-07-27", "staff trip"),
+        ("2026-07-28", "staff trip"), ("2026-07-29", "staff trip")
+    ]
+    if saved_gym_holidays and len(saved_gym_holidays) > 0:
+        cursor.executemany("INSERT INTO gym_holidays (holiday_date, holiday_name) VALUES (?, ?);", saved_gym_holidays)
+    else:
+        cursor.executemany("INSERT INTO gym_holidays (holiday_date, holiday_name) VALUES (?, ?);", default_gym_holidays)
+
+    # Leave Reasons (Restore or defaults)
+    default_leaves = [
+        ("10002", "2026-01-10", "vacation", "ลาพักร้อน", "", "2026-09-19T09:05:54.917Z"),
+        ("10002", "2026-01-31", "vacation", "ลาพักร้อน", "", "2026-09-19T09:06:13.971Z"),
+        ("10002", "2026-02-02", "vacation", "ลาพักร้อน", "", "2026-09-19T09:06:33.402Z"),
+        ("10002", "2026-02-21", "vacation", "ลาพักร้อน", "", "2026-09-19T09:06:55.643Z"),
+        ("10002", "2026-02-23", "vacation", "ลาพักร้อน", "", "2026-09-19T09:07:00.285Z"),
+        ("10002", "2026-02-27", "sick", "ลาป่วย", "", "2026-09-19T09:07:10.350Z"),
+        ("10002", "2026-02-28", "sick", "ลาป่วย", "", "2026-09-19T09:07:13.606Z"),
+        ("10002", "2026-03-02", "sick", "ลาป่วย", "", "2026-09-19T09:07:28.822Z"),
+        ("10001", "2026-03-02", "sick", "ลาป่วย", "", "2026-09-19T09:07:34.297Z"),
+        ("10003", "2026-03-14", "vacation", "ลาพักร้อน", "", "2026-09-19T09:08:00.410Z"),
+        ("10003", "2026-03-16", "vacation", "ลาพักร้อน", "", "2026-09-19T09:08:04.093Z"),
+        ("10002", "2026-03-17", "vacation", "ลาพักร้อน", "", "2026-09-19T09:08:23.180Z"),
+        ("10002", "2026-03-31", "vacation", "ลาพักร้อน", "", "2026-09-19T09:08:27.216Z"),
+        ("10001", "2026-04-10", "vacation", "ลาพักร้อน", "", "2026-09-19T09:08:51.330Z"),
+        ("10001", "2026-04-11", "vacation", "ลาพักร้อน", "", "2026-09-19T09:08:53.922Z"),
+        ("10001", "2026-04-17", "sick", "ลาป่วย", "อุบัติเหตุ", "2026-09-19T09:09:07.828Z"),
+        ("10001", "2026-04-18", "sick", "ลาป่วย", "อุบัติเหตุ", "2026-09-19T09:09:12.769Z"),
+        ("10001", "2026-04-20", "sick", "ลาป่วย", "อุบัติเหตุ", "2026-09-19T09:09:17.690Z"),
+        ("10001", "2026-04-21", "sick", "ลาป่วย", "อุบัติเหตุ", "2026-09-19T09:09:22.004Z"),
+        ("10001", "2026-04-22", "sick", "ลาป่วย", "อุบัติเหตุ", "2026-09-19T09:09:26.150Z"),
+        ("10001", "2026-04-24", "sick", "ลาป่วย", "อุบัติเหตุ", "2026-09-19T09:09:36.107Z"),
+        ("10001", "2026-04-25", "sick", "ลาป่วย", "อุบัติเหตุ", "2026-09-19T09:09:41.177Z"),
+        ("10001", "2026-04-27", "sick", "ลาป่วย", "อุบัติเหตุ", "2026-09-19T09:09:46.359Z"),
+        ("10001", "2026-04-28", "sick", "ลาป่วย", "อุบัติเหตุ", "2026-09-19T09:09:52.030Z"),
+        ("10001", "2026-04-29", "sick", "ลาป่วย", "อุบัติเหตุ", "2026-09-19T09:09:58.924Z"),
+        ("10001", "2026-05-01", "sick", "ลาป่วย", "อุบัติเหตุ", "2026-09-19T09:10:11.950Z"),
+        ("10001", "2026-05-02", "sick", "ลาป่วย", "อุบัติเหตุ", "2026-09-19T09:10:17.658Z"),
+        ("10003", "2026-04-16", "vacation", "ลาพักร้อน", "", "2026-09-19T09:10:43.184Z"),
+        ("10003", "2026-04-17", "vacation", "ลาพักร้อน", "", "2026-09-19T09:10:46.056Z"),
+        ("10003", "2026-04-18", "vacation", "ลาพักร้อน", "", "2026-09-19T09:10:48.638Z")
+    ]
+    if saved_leaves and len(saved_leaves) > 0:
+        cursor.executemany("INSERT INTO leave_reasons (emp_id, iso_date, leave_type, leave_label, note, updated_at) VALUES (?, ?, ?, ?, ?, ?);", saved_leaves)
+    else:
+        cursor.executemany("INSERT INTO leave_reasons (emp_id, iso_date, leave_type, leave_label, note, updated_at) VALUES (?, ?, ?, ?, ?, ?);", default_leaves)
+
+    # App Settings (Restore or defaults)
     default_settings = [
         ('app_theme', 'light'),
         ('saved_filters', json.dumps({
@@ -416,7 +495,10 @@ def create_sqlite_db(known_employees, all_records):
             "pageSize": 50
         }, ensure_ascii=False))
     ]
-    cursor.executemany("INSERT INTO app_settings (key, value) VALUES (?, ?);", default_settings)
+    if saved_settings and len(saved_settings) > 0:
+        cursor.executemany("INSERT INTO app_settings (key, value) VALUES (?, ?);", saved_settings)
+    else:
+        cursor.executemany("INSERT INTO app_settings (key, value) VALUES (?, ?);", default_settings)
 
     conn.commit()
     conn.close()

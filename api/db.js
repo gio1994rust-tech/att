@@ -1,18 +1,19 @@
-import { createClient } from '@libsql/client/web';
+import pg from 'pg';
+const { Pool } = pg;
 
 const SEED_DATA = {
   gym_holidays: [
     { date: "2025-01-01", name: "ปีใหม่ 2025" },
-    { date: "2025-04-14", name: "สงกราน2025" },
-    { date: "2025-04-15", name: "สงกราน2025" },
-    { date: "2025-04-16", name: "สงกราน2025" },
+    { date: "2025-04-14", name: "สงกรานต์ 2025" },
+    { date: "2025-04-15", name: "สงกรานต์ 2025" },
+    { date: "2025-04-16", name: "สงกรานต์ 2025" },
     { date: "2025-12-31", name: "ปีใหม่ 2026" },
     { date: "2026-01-01", name: "ปีใหม่ 2026" },
     { date: "2026-01-02", name: "ปีใหม่ 2026" },
     { date: "2026-01-03", name: "ปีใหม่ 2026" },
-    { date: "2026-04-13", name: "สงกราน" },
-    { date: "2026-04-14", name: "สงกราน" },
-    { date: "2026-04-15", name: "สงกราน" },
+    { date: "2026-04-13", name: "สงกรานต์" },
+    { date: "2026-04-14", name: "สงกรานต์" },
+    { date: "2026-04-15", name: "สงกรานต์" },
     { date: "2026-07-27", name: "staff trip" },
     { date: "2026-07-28", name: "staff trip" },
     { date: "2026-07-29", name: "staff trip" }
@@ -64,69 +65,117 @@ const SEED_DATA = {
   ]
 };
 
-function getTursoClient() {
-  const url = process.env.TURSO_DATABASE_URL;
-  const authToken = process.env.TURSO_AUTH_TOKEN;
-  if (!url || !authToken) {
+let pool = null;
+
+function getPostgresPool() {
+  if (pool) return pool;
+  const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+  if (!connectionString) {
     return null;
   }
-  return createClient({ url, authToken });
+
+  const isLocal = connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
+  pool = new Pool({
+    connectionString,
+    ssl: isLocal ? false : { rejectUnauthorized: false },
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
+  });
+
+  return pool;
 }
 
+let tablesEnsured = false;
+
 async function ensureTables(client) {
-  await client.batch([
-    `CREATE TABLE IF NOT EXISTS gym_holidays (
-      holiday_date TEXT PRIMARY KEY,
-      holiday_name TEXT NOT NULL
-    );`,
-    `CREATE TABLE IF NOT EXISTS leave_reasons (
-      emp_id TEXT NOT NULL,
-      iso_date TEXT NOT NULL,
-      leave_type TEXT NOT NULL,
-      leave_label TEXT,
+  if (tablesEnsured) return;
+
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS gym_holidays (
+      holiday_date VARCHAR(50) PRIMARY KEY,
+      holiday_name VARCHAR(255) NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS leave_reasons (
+      emp_id VARCHAR(50) NOT NULL,
+      iso_date VARCHAR(50) NOT NULL,
+      leave_type VARCHAR(50) NOT NULL,
+      leave_label VARCHAR(100),
       note TEXT,
-      updated_at TEXT,
+      updated_at VARCHAR(100),
       PRIMARY KEY (emp_id, iso_date)
-    );`,
-    `CREATE TABLE IF NOT EXISTS employee_dayoffs (
-      emp_id TEXT NOT NULL,
+    );
+
+    CREATE TABLE IF NOT EXISTS employee_dayoffs (
+      emp_id VARCHAR(50) NOT NULL,
       day_of_week INTEGER NOT NULL,
       PRIMARY KEY (emp_id, day_of_week)
-    );`,
-    `CREATE TABLE IF NOT EXISTS app_settings (
-      key TEXT PRIMARY KEY,
+    );
+
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key VARCHAR(100) PRIMARY KEY,
       value TEXT NOT NULL
-    );`
-  ]);
+    );
+
+    CREATE TABLE IF NOT EXISTS employees (
+      id VARCHAR(50) PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      card_id VARCHAR(50)
+    );
+
+    CREATE TABLE IF NOT EXISTS attendance_records (
+      id SERIAL PRIMARY KEY,
+      emp_id VARCHAR(50) NOT NULL,
+      card_id VARCHAR(50),
+      emp_name VARCHAR(255) NOT NULL,
+      date VARCHAR(50) NOT NULL,
+      iso_date VARCHAR(50) NOT NULL,
+      year INTEGER NOT NULL,
+      month INTEGER NOT NULL,
+      day INTEGER NOT NULL,
+      day_of_week INTEGER NOT NULL,
+      count INTEGER NOT NULL DEFAULT 0,
+      punches TEXT,
+      check_in VARCHAR(20),
+      check_out VARCHAR(20),
+      work_hours NUMERIC(6, 2),
+      work_hours_formatted VARCHAR(50),
+      initial_status VARCHAR(50),
+      CONSTRAINT unique_emp_date UNIQUE (emp_id, iso_date)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_records_emp ON attendance_records(emp_id);
+    CREATE INDEX IF NOT EXISTS idx_records_iso_date ON attendance_records(iso_date);
+    CREATE INDEX IF NOT EXISTS idx_records_year ON attendance_records(year);
+  `);
 
   // Seed default data if empty
-  const countRes = await client.execute("SELECT count(*) as cnt FROM gym_holidays;");
+  const countRes = await client.query("SELECT count(*) as cnt FROM gym_holidays;");
   const count = Number(countRes.rows[0]?.cnt || 0);
 
   if (count === 0) {
-    const seedStmts = [];
     for (const h of SEED_DATA.gym_holidays) {
-      seedStmts.push({
-        sql: "INSERT OR IGNORE INTO gym_holidays (holiday_date, holiday_name) VALUES (?, ?);",
-        args: [h.date, h.name]
-      });
+      await client.query(
+        "INSERT INTO gym_holidays (holiday_date, holiday_name) VALUES ($1, $2) ON CONFLICT (holiday_date) DO NOTHING;",
+        [h.date, h.name]
+      );
     }
     for (const l of SEED_DATA.leave_reasons) {
-      seedStmts.push({
-        sql: "INSERT OR IGNORE INTO leave_reasons (emp_id, iso_date, leave_type, leave_label, note, updated_at) VALUES (?, ?, ?, ?, ?, ?);",
-        args: [l.emp_id, l.iso_date, l.leave_type, l.leave_label, l.note, l.updated_at]
-      });
+      await client.query(
+        "INSERT INTO leave_reasons (emp_id, iso_date, leave_type, leave_label, note, updated_at) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (emp_id, iso_date) DO NOTHING;",
+        [l.emp_id, l.iso_date, l.leave_type, l.leave_label, l.note, l.updated_at]
+      );
     }
     for (const d of SEED_DATA.employee_dayoffs) {
-      seedStmts.push({
-        sql: "INSERT OR IGNORE INTO employee_dayoffs (emp_id, day_of_week) VALUES (?, ?);",
-        args: [d.emp_id, d.day_of_week]
-      });
-    }
-    if (seedStmts.length > 0) {
-      await client.batch(seedStmts);
+      await client.query(
+        "INSERT INTO employee_dayoffs (emp_id, day_of_week) VALUES ($1, $2) ON CONFLICT (emp_id, day_of_week) DO NOTHING;",
+        [d.emp_id, d.day_of_week]
+      );
     }
   }
+
+  tablesEnsured = true;
 }
 
 export default async function handler(req, res) {
@@ -139,24 +188,25 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const client = getTursoClient();
-  if (!client) {
+  const p = getPostgresPool();
+  if (!p) {
     return res.status(200).json({
       ok: false,
-      turso: false,
-      message: 'Turso environment variables (TURSO_DATABASE_URL, TURSO_AUTH_TOKEN) not configured'
+      postgres: false,
+      message: 'PostgreSQL connection URL (POSTGRES_URL or DATABASE_URL) not configured in environment variables'
     });
   }
 
+  const client = await p.connect();
   try {
     await ensureTables(client);
 
     if (req.method === 'GET') {
       const [holidaysRes, leaveRes, dayoffsRes, settingsRes] = await Promise.all([
-        client.execute("SELECT holiday_date, holiday_name FROM gym_holidays ORDER BY holiday_date ASC;"),
-        client.execute("SELECT emp_id, iso_date, leave_type, leave_label, note, updated_at FROM leave_reasons;"),
-        client.execute("SELECT emp_id, day_of_week FROM employee_dayoffs;"),
-        client.execute("SELECT key, value FROM app_settings;")
+        client.query("SELECT holiday_date, holiday_name FROM gym_holidays ORDER BY holiday_date ASC;"),
+        client.query("SELECT emp_id, iso_date, leave_type, leave_label, note, updated_at FROM leave_reasons ORDER BY iso_date ASC;"),
+        client.query("SELECT emp_id, day_of_week FROM employee_dayoffs ORDER BY emp_id, day_of_week ASC;"),
+        client.query("SELECT key, value FROM app_settings;")
       ]);
 
       const gymHolidays = holidaysRes.rows.map(r => ({
@@ -187,7 +237,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         ok: true,
-        turso: true,
+        postgres: true,
         data: {
           gym_holidays: gymHolidays,
           leave_reasons: leaveReasons,
@@ -203,63 +253,123 @@ export default async function handler(req, res) {
 
       if (action === 'save_gym_holiday') {
         const { date, name } = body;
-        await client.execute({
-          sql: "INSERT OR REPLACE INTO gym_holidays (holiday_date, holiday_name) VALUES (?, ?);",
-          args: [date, name]
-        });
+        await client.query(
+          "INSERT INTO gym_holidays (holiday_date, holiday_name) VALUES ($1, $2) ON CONFLICT (holiday_date) DO UPDATE SET holiday_name = EXCLUDED.holiday_name;",
+          [date, name]
+        );
         return res.status(200).json({ ok: true });
       }
 
       if (action === 'delete_gym_holiday') {
         const { date } = body;
-        await client.execute({
-          sql: "DELETE FROM gym_holidays WHERE holiday_date = ?;",
-          args: [date]
-        });
+        await client.query("DELETE FROM gym_holidays WHERE holiday_date = $1;", [date]);
         return res.status(200).json({ ok: true });
       }
 
       if (action === 'save_leave_reason') {
         const { emp_id, iso_date, leave_type, leave_label, note, updated_at } = body;
-        await client.execute({
-          sql: "INSERT OR REPLACE INTO leave_reasons (emp_id, iso_date, leave_type, leave_label, note, updated_at) VALUES (?, ?, ?, ?, ?, ?);",
-          args: [emp_id, iso_date, leave_type, leave_label || '', note || '', updated_at || new Date().toISOString()]
-        });
+        await client.query(`
+          INSERT INTO leave_reasons (emp_id, iso_date, leave_type, leave_label, note, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6)
+          ON CONFLICT (emp_id, iso_date)
+          DO UPDATE SET
+            leave_type = EXCLUDED.leave_type,
+            leave_label = EXCLUDED.leave_label,
+            note = EXCLUDED.note,
+            updated_at = EXCLUDED.updated_at;
+        `, [emp_id, iso_date, leave_type, leave_label || '', note || '', updated_at || new Date().toISOString()]);
         return res.status(200).json({ ok: true });
       }
 
       if (action === 'delete_leave_reason') {
         const { emp_id, iso_date } = body;
-        await client.execute({
-          sql: "DELETE FROM leave_reasons WHERE emp_id = ? AND iso_date = ?;",
-          args: [emp_id, iso_date]
-        });
+        await client.query("DELETE FROM leave_reasons WHERE emp_id = $1 AND iso_date = $2;", [emp_id, iso_date]);
         return res.status(200).json({ ok: true });
       }
 
       if (action === 'save_employee_dayoffs') {
         const { emp_id, days } = body;
-        const stmts = [
-          { sql: "DELETE FROM employee_dayoffs WHERE emp_id = ?;", args: [emp_id] }
-        ];
-        if (Array.isArray(days)) {
-          for (const d of days) {
-            stmts.push({
-              sql: "INSERT INTO employee_dayoffs (emp_id, day_of_week) VALUES (?, ?);",
-              args: [emp_id, Number(d)]
-            });
+        await client.query("BEGIN;");
+        try {
+          await client.query("DELETE FROM employee_dayoffs WHERE emp_id = $1;", [emp_id]);
+          if (Array.isArray(days)) {
+            for (const d of days) {
+              await client.query(
+                "INSERT INTO employee_dayoffs (emp_id, day_of_week) VALUES ($1, $2) ON CONFLICT (emp_id, day_of_week) DO NOTHING;",
+                [emp_id, Number(d)]
+              );
+            }
           }
+          await client.query("COMMIT;");
+        } catch (e) {
+          await client.query("ROLLBACK;");
+          throw e;
         }
-        await client.batch(stmts);
         return res.status(200).json({ ok: true });
       }
 
       if (action === 'save_setting') {
         const { key, value } = body;
-        await client.execute({
-          sql: "INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?);",
-          args: [key, typeof value === 'object' ? JSON.stringify(value) : String(value)]
-        });
+        await client.query(
+          "INSERT INTO app_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;",
+          [key, typeof value === 'object' ? JSON.stringify(value) : String(value)]
+        );
+        return res.status(200).json({ ok: true });
+      }
+
+      if (action === 'save_imported_records') {
+        const { employees, records } = body;
+        await client.query("BEGIN;");
+        try {
+          if (Array.isArray(employees)) {
+            for (const emp of employees) {
+              await client.query(
+                "INSERT INTO employees (id, name, card_id) VALUES ($1, $2, $3) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, card_id = EXCLUDED.card_id;",
+                [emp.id, emp.name, emp.cardId || emp.id]
+              );
+            }
+          }
+          if (Array.isArray(records)) {
+            for (const r of records) {
+              await client.query(`
+                INSERT INTO attendance_records (
+                  emp_id, card_id, emp_name, date, iso_date, year, month, day, day_of_week,
+                  count, punches, check_in, check_out, work_hours, work_hours_formatted, initial_status
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+                ON CONFLICT (emp_id, iso_date)
+                DO UPDATE SET
+                  count = EXCLUDED.count,
+                  punches = EXCLUDED.punches,
+                  check_in = EXCLUDED.check_in,
+                  check_out = EXCLUDED.check_out,
+                  work_hours = EXCLUDED.work_hours,
+                  work_hours_formatted = EXCLUDED.work_hours_formatted,
+                  initial_status = EXCLUDED.initial_status;
+              `, [
+                r.empId,
+                r.cardId || '',
+                r.empName,
+                r.date,
+                r.isoDate,
+                r.year,
+                r.month,
+                r.day,
+                r.dayOfWeek,
+                r.count || 0,
+                JSON.stringify(r.punches || []),
+                r.checkIn || '',
+                r.checkOut || '',
+                r.workHours !== undefined ? r.workHours : null,
+                r.workHoursFormatted || '',
+                r.initialStatus || 'absent'
+              ]);
+            }
+          }
+          await client.query("COMMIT;");
+        } catch (e) {
+          await client.query("ROLLBACK;");
+          throw e;
+        }
         return res.status(200).json({ ok: true });
       }
 
@@ -268,7 +378,9 @@ export default async function handler(req, res) {
 
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   } catch (err) {
-    console.error("Turso API error:", err);
+    console.error("PostgreSQL API error:", err);
     return res.status(500).json({ ok: false, error: err.message });
+  } finally {
+    client.release();
   }
 }

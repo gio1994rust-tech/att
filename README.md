@@ -51,22 +51,44 @@ python generate_cleaned_data.py
 ## 💻 การเปิดใช้งานในเครื่อง (Local)
 
 - ดับเบิลคลิกเปิดไฟล์ `run_dashboard.bat`
-  - ระบบจะตรวจหา Python หากมีจะเปิดผ่าน Local Server (`http://localhost:8000`) ให้อัตโนมัติ
-  - หรือสามารถดับเบิลคลิกเปิด `index.html` ตรงๆ ผ่านเว็บเบราว์เซอร์ได้เช่นกัน
+  - หากมี Node.js ระบบจะรันผ่าน `node server.js` (`http://localhost:8000`) พร้อมระบบ API เชื่อมต่อกับ PostgreSQL เต็มรูปแบบ
+  - หรือรันผ่านคำสั่ง:
+    ```bash
+    npm start
+    ```
 
-## ☁️ ระบบ Turso Cloud SQLite (ซิงค์ข้อมูล Real-time ข้ามอุปกรณ์)
+## 🐘 ระบบ PostgreSQL Cloud (ซิงค์ข้อมูล Real-time ข้ามอุปกรณ์ ปลอดภัย 100%)
 
-ระบบรองรับการเชื่อมต่อ **Turso (Serverless SQLite)** บน Vercel:
-- **ซิงค์ข้อมูล Real-time**: เมื่อเพิ่ม/ลบวันหยุดยิม, วันลา, หรือกำหนดวันหยุดประจำตัว ข้อมูลจะถูกบันทึกขึ้น Turso Cloud อัตโนมัติ ทำให้คอมพิวเตอร์เครื่องอื่น มือถือ หรือแท็บเล็ตเปิดเข้ามาแล้วเห็นข้อมูลตรงกันทันที
+ระบบรองรับการเชื่อมต่อกับ **PostgreSQL** (เช่น Neon, Supabase, Vercel Postgres, Render, Railway):
+- **ข้อมูลไม่สูญหายแน่นอน**: บันทึกลงเซิร์ฟเวอร์ PostgreSQL โดยตรง ข้อมูลวันลาและวันหยุดจะไม่หายเมื่อล้างแคชหรือเปลี่ยนเครื่อง
+- **ซิงค์ข้อมูลข้ามเครื่อง Real-time**: เมื่อเพิ่ม/ลบวันหยุดยิม, วันลา, หรือกำหนดวันหยุดประจำตัว จะบันทึกลงฐานข้อมูลทันที ทำให้ทุกเครื่องเห็นตรงกัน
 - **โหมด Hybrid ปลอดภัย**: 
-  - หากออนไลน์บน Vercel: เชื่อมต่อ Turso Cloud อัตโนมัติ (แสดงป้าย `☁️ Turso Cloud (Active)`)
-  - หากเปิดแบบออฟไลน์/ในเครื่อง: สลับไปใช้ WebAssembly SQLite ภายในเครื่องอัตโนมัติ โดยไม่สะดุด
-- **ปุ่มซิงค์ด่วน**: มีปุ่ม `🔄 ซิงค์จากเซิร์ฟเวอร์` บนแถบเมนูเพื่อดึงข้อมูลล่าสุดได้ตลอดเวลา
+  - หากเชื่อมต่อ PostgreSQL ได้: แสดงป้ายสถานะ `🐘 PostgreSQL (Active)`
+  - หากเปิดแบบออฟไลน์/ยังไม่ได้ใส่ URL: ระบบยังใช้งานได้ปกติโดยไม่หยุดชะงัก
+- **คำสั่ง Migration ย้ายข้อมูลเก่าทั้งหมด**:
+  - เมื่อได้ `POSTGRES_URL` แล้ว สามารถรันคำสั่งย้ายประวัติเวลาทำงานและวันลาทั้งหมดไปยัง PostgreSQL ในคลิกเดียว:
+    ```bash
+    npm run migrate
+    ```
 
-## 🚀 การ Deploy บน Vercel & เชื่อมต่อ Turso
+## 🚀 วิธีตั้งค่าเชื่อมต่อ PostgreSQL ฟรี (เช่น Neon หรือ Supabase)
 
-1. นำเข้า Repository [github.com/gio1994rust-tech/att](https://github.com/gio1994rust-tech/att) ใน Vercel Dashboard
-2. ในแถบ **Storage** ของ Vercel: เลือก **Turso (Serverless SQLite)** แล้วกด Connect
-3. Vercel จะผูก `TURSO_DATABASE_URL` และ `TURSO_AUTH_TOKEN` เข้ากับ Serverless API (`/api/db`) อัตโนมัติ
-4. ทุกเครื่องที่เข้าใช้งานจะซิงค์ข้อมูลวันหยุดและวันลาตรงกันทันทีแบบ Real-time
+1. **สมัครและรับ Connection URL (ฟรี):**
+   - **Neon (แนะนำ ง่ายและเร็วที่สุด):** เข้าเว็บ [neon.tech](https://neon.tech) สมัครฟรี > กด Create Project > คัดลอก Connection string (เช่น `postgresql://user:password@ep-xyz.neon.tech/neondb?sslmode=require`)
+   - **หรือ Supabase:** เข้าเว็บ [supabase.com](https://supabase.com) > สร้าง Project > คัดลอก URI จาก Database Settings
+2. **ใส่ในไฟล์ `.env`:**
+   - คัดลอกไฟล์ `.env.example` เป็น `.env`
+   - ใส่ Connection URL ลงในตัวแปร:
+     ```env
+     POSTGRES_URL=postgresql://user:password@ep-xyz.neon.tech/neondb?sslmode=require
+     ```
+3. **รัน Migration ย้ายข้อมูลเดิม:**
+   ```bash
+   npm run migrate
+   ```
+4. **หาก Deploy บน Vercel:**
+   - ใส่ Environment Variable ใน Vercel Project Settings:
+     - Key: `POSTGRES_URL` (หรือ `DATABASE_URL`)
+     - Value: Connection URL ของคุณ
+
 

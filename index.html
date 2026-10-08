@@ -3545,7 +3545,7 @@
         }
       }
 
-      // Turso Cloud Sync Helper (Zero-latency local first + background cloud persistence)
+      // Cloud Sync Helper (Zero-latency local first + background cloud persistence with PostgreSQL)
       async function syncToTursoCloud(payload) {
         if (window.location.protocol === 'file:') return;
         try {
@@ -3553,9 +3553,9 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
-          }).catch(err => console.warn("Turso sync background error:", err));
+          }).catch(err => console.warn("PostgreSQL/Cloud sync background error:", err));
         } catch (e) {
-          console.warn("Turso sync call error:", e);
+          console.warn("PostgreSQL/Cloud sync call error:", e);
         }
       }
 
@@ -3565,8 +3565,8 @@
           const res = await fetch('/api/db');
           if (!res.ok) return false;
           const json = await res.json();
-          if (json.ok && json.turso && json.data) {
-            console.log("☁️ Turso Cloud connected! Updating data...");
+          if (json.ok && (json.postgres || json.turso) && json.data) {
+            console.log("🐘 PostgreSQL / Cloud connected! Updating data...");
             const cloud = json.data;
 
             // Update gym holidays
@@ -3586,23 +3586,32 @@
               }
             }
 
-            // Update leave reasons
+            // Update leave reasons (Merge intelligently so local leaves are never accidentally wiped)
             if (cloud.leave_reasons && Array.isArray(cloud.leave_reasons)) {
+              cloud.leave_reasons.forEach(l => {
+                const key = `${l.emp_id}_${l.iso_date}`;
+                state.leaveReasons[key] = {
+                  type: l.leave_type,
+                  label: l.leave_label,
+                  note: l.note,
+                  updatedAt: l.updated_at
+                };
+              });
+
               if (db) {
                 try {
                   db.run("BEGIN TRANSACTION;");
                   db.run("DELETE FROM leave_reasons;");
                   const stmt = db.prepare("INSERT INTO leave_reasons (emp_id, iso_date, leave_type, leave_label, note, updated_at) VALUES (?, ?, ?, ?, ?, ?);");
-                  cloud.leave_reasons.forEach(l => {
-                    const key = `${l.emp_id}_${l.iso_date}`;
-                    state.leaveReasons[key] = {
-                      type: l.leave_type,
-                      label: l.leave_label,
-                      note: l.note,
-                      updatedAt: l.updated_at
-                    };
-                    stmt.run([l.emp_id, l.iso_date, l.leave_type || '', l.leave_label || '', l.note || '', l.updated_at || '']);
-                  });
+                  for (const key in (state.leaveReasons || {})) {
+                    const parts = key.split('_');
+                    const empId = parts[0];
+                    const isoDate = parts.slice(1).join('_');
+                    const item = state.leaveReasons[key];
+                    if (item && empId && isoDate) {
+                      stmt.run([empId, isoDate, item.type || '', item.label || '', item.note || '', item.updatedAt || '']);
+                    }
+                  }
                   stmt.free();
                   db.run("COMMIT;");
                 } catch (_) {}
@@ -3634,10 +3643,15 @@
             // Update UI badge
             const badge = document.getElementById('header-sqlite-badge');
             if (badge) {
-              badge.textContent = '☁️ Turso Cloud (Active)';
-              badge.title = 'เชื่อมต่อฐานข้อมูล Turso Serverless SQLite สำเร็จ ซิงค์ข้อมูลตรงกันทุกเครื่อง Real-time';
-              badge.style.background = 'linear-gradient(135deg, #065f46, #047857)';
-              badge.style.borderColor = '#10b981';
+              const isPg = Boolean(json.postgres);
+              badge.textContent = isPg ? '🐘 PostgreSQL (Active)' : '☁️ Cloud DB (Active)';
+              badge.title = isPg
+                ? 'เชื่อมต่อฐานข้อมูล PostgreSQL Cloud สำเร็จ ข้อมูลซิงค์ตรงกันทุกเครื่อง Real-time ถาวร 100%'
+                : 'เชื่อมต่อฐานข้อมูล Cloud สำเร็จ ซิงค์ข้อมูลตรงกันทุกเครื่อง Real-time';
+              badge.style.background = isPg
+                ? 'linear-gradient(135deg, #0284c7, #0369a1)'
+                : 'linear-gradient(135deg, #065f46, #047857)';
+              badge.style.borderColor = isPg ? '#38bdf8' : '#10b981';
             }
 
             rebuildHolidayMaps();
@@ -3646,7 +3660,7 @@
             return true;
           }
         } catch (e) {
-          console.warn("syncFromTursoCloud warning:", e);
+          console.warn("syncFromCloudDB warning:", e);
         }
         return false;
       }
@@ -3882,6 +3896,13 @@
           db.run("COMMIT;");
           persistDatabase();
           console.log(`Saved ${validRecords.length} records to SQLite successfully (mode: ${mode})`);
+
+          // Sync imported records to PostgreSQL Cloud in background
+          syncToTursoCloud({
+            action: 'save_imported_records',
+            employees: validEmployees,
+            records: validRecords
+          });
         } catch (e) {
           try { db.run("ROLLBACK;"); } catch (_) {}
           console.error("saveImportedDataToSQLite error:", e);
@@ -5013,6 +5034,11 @@
           deleteBtn.addEventListener('click', () => {
             if (state.leaveReasons && state.leaveReasons[leaveKey]) {
               delete state.leaveReasons[leaveKey];
+              syncToTursoCloud({
+                action: 'delete_leave_reason',
+                emp_id: record.empId,
+                iso_date: record.isoDate
+              });
               saveLeaveReasonsToDB();
               renderAll();
               const updatedEval = evaluateRecordStatus(record);
@@ -6388,15 +6414,15 @@
         });
       }
 
-      // Sync from Turso Server Wire-up
+      // Sync from Server Wire-up (PostgreSQL / Cloud DB)
       if (dom.btnSyncServer) {
         dom.btnSyncServer.addEventListener('click', async () => {
-          showToast('🔄 กำลังเชื่อมต่อซิงค์ข้อมูลกับ Turso Cloud...', 'info');
+          showToast('🔄 กำลังเชื่อมต่อซิงค์ข้อมูลกับ PostgreSQL...', 'info');
           const synced = await syncFromTursoCloud();
           if (synced) {
-            showToast('✅ ซิงค์ข้อมูลล่าสุดจาก Turso Cloud สำเร็จ!', 'success');
+            showToast('✅ ซิงค์ข้อมูลล่าสุดจาก PostgreSQL สำเร็จ!', 'success');
           } else {
-            showToast('ℹ️ ใช้งานโหมดออฟไลน์ หรือยังไม่ได้ตั้งค่า Turso บนเซิร์ฟเวอร์', 'info');
+            showToast('ℹ️ ใช้งานโหมดออฟไลน์ หรือยังไม่ได้ตั้งค่า POSTGRES_URL บนเซิร์ฟเวอร์', 'info');
           }
         });
       }
